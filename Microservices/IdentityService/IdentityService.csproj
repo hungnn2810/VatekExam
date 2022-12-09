@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Controllers\" />
+    <None Remove="Commands\" />
+    <None Remove="Queries\" />
+    <None Remove="Handlers\" />
+    <None Remove="Handlers\CHandlers\" />
+    <None Remove="Handlers\QHandlers\" />
+    <None Remove="IdentityServer4" />
+    <None Remove="IdentityServer4.EntityFramework" />
+    <None Remove="MediatR" />
+    <None Remove="MediatR.Extensions.Microsoft.DependencyInjection" />
+    <None Remove="Microsoft.EntityFrameworkCore.SqlServer" />
+    <None Remove="Microsoft.EntityFrameworkCore.Design" />
+    <None Remove="Responses\" />
+    <None Remove="Swashbuckle.AspNetCore" />
+    <None Remove="Services\" />
+    <None Remove="Microsoft.AspNetCore.Authentication" />
+    <None Remove="IdentityServer4.AccessTokenValidation" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+    <Folder Include="Commands\" />
+    <Folder Include="Queries\" />
+    <Folder Include="Handlers\" />
+    <Folder Include="Handlers\CHandlers\" />
+    <Folder Include="Handlers\QHandlers\" />
+    <Folder Include="Responses\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="IdentityServer4" Version="4.1.2" />
+    <PackageReference Include="IdentityServer4.EntityFramework" Version="4.1.2" />
+    <PackageReference Include="MediatR" Version="11.1.0" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.31" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\EntityFramework\Identity.EntityFramework\Identity.EntityFramework.csproj">
+      <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Application.Common\Application.Common.csproj">
+      <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

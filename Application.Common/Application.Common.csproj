@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Constants\" />
+    <None Remove="Utils\" />
+    <None Remove="Enums\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Constants\" />
+    <Folder Include="Utils\" />
+    <Folder Include="Enums\" />
+  </ItemGroup>
+</Project>
