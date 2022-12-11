@@ -7,8 +7,20 @@
 
   <ItemGroup>
     <None Remove="Swashbuckle.AspNetCore" />
+    <None Remove="Commons\" />
+    <None Remove="Commons\Constants\" />
+    <None Remove="Commons\Enums\" />
+    <None Remove="Commons\Communication\" />
+    <None Remove="MediatR" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="MediatR" Version="11.1.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Commons\" />
+    <Folder Include="Commons\Constants\" />
+    <Folder Include="Commons\Enums\" />
+    <Folder Include="Commons\Communication\" />
   </ItemGroup>
 </Project>

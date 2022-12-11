@@ -1,5 +1,9 @@
-﻿using System.Threading.Tasks;
-using IdentityService.Commands;
+﻿using System.Net;
+using System.Text.Json;
+using System.Threading.Tasks;
+using IdentityService.ApiModels.ApiInputModels.Auth;
+using IdentityService.ApiModels.ApiResponseModels;
+using IdentityService.Commons.Communication;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,25 +22,36 @@ namespace IdentityService.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterCommand input)
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ApiResponseModel<ConfirmationResponseModel>), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> Register([FromBody] RegisterInputModel input)
         {
-            var result = await _mediator.Send(input);
-            return result != null ? Created("", result) : BadRequest(result);
+            return await _mediator.Send(ApiActionModel.CreateRequest(input));
         }
 
         [HttpPost("verify")]
-        public async Task<IActionResult> VerifyAccount([FromBody] VerifyCommand input)
+        [Produces("application/json")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> VerifyAccount([FromBody] VerifyInputModel input)
         {
-            var result = await _mediator.Send(input);
-            return result != null ? Ok() : BadRequest(result);
+            return await _mediator.Send(ApiActionModel.CreateRequest(input));
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginCommand input)
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ApiResponseModel<UserLoginResponseModel>), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> Login([FromBody] LoginInputModel input)
         {
-            var result = await _mediator.Send(input);
-            return result != null ? Ok(result) : BadRequest(result);
+            return await _mediator.Send(ApiActionModel.CreateRequest(input));
         }
+
+        //[HttpPost("resend-confirmation")]
+        //[Produces("application/json")]
+        //[ProducesResponseType(typeof(ApiResponseModel<ConfirmationResponseModel>), (int)HttpStatusCode.OK)]
+        //public async Task<IActionResult> ResendConfirmation([FromBody] ResendConfirmationInputModel)
+        //{
+        //    return await _mediator
+        //}
     }
 }
 

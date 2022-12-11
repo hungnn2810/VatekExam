@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using Application.Common.Constants;
 using IdentityServer4;
 using IdentityServer4.Models;
+using IdentityService.Commons.Constants;
 
 namespace IdentityService
 {

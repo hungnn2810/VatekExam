@@ -2,12 +2,11 @@
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Application.Common.Constants;
-using Application.Common.Enums;
-using Application.Common.Utils;
 using Identity.EntityFramework;
 using IdentityServer4.Models;
 using IdentityServer4.Validation;
+using IdentityService.Commons.Constants;
+using IdentityService.Commons.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace IdentityService.Services
