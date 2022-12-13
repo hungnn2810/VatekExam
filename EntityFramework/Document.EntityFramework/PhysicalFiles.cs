@@ -7,16 +7,19 @@ using System.Collections.Generic;
 
 namespace Document.EntityFramework
 {
-    public partial class PhysialFiles
+    public partial class PhysicalFiles
     {
+        public PhysicalFiles()
+        {
+            Documents = new HashSet<Documents>();
+        }
+
         public long PhysicalFileId { get; set; }
         public string PhysicalFileName { get; set; }
         public string PhysicalFileExtention { get; set; }
         public long FileLengthInBytes { get; set; }
         public short? S3BucketId { get; set; }
         public string S3FileKey { get; set; }
-        public long DocumentId { get; set; }
-        public int PageNumber { get; set; }
         public bool Active { get; set; }
         public bool Deleted { get; set; }
         public DateTime CreatedAt { get; set; }
@@ -24,7 +27,7 @@ namespace Document.EntityFramework
         public string CreatedBy { get; set; }
         public string UpdatedBy { get; set; }
 
-        public virtual Documents Document { get; set; }
         public virtual S3Buckets S3Bucket { get; set; }
+        public virtual ICollection<Documents> Documents { get; set; }
     }
 }

@@ -47,6 +47,7 @@ namespace IdentityService.Services
             var customClaims = new List<Claim>()
             {
                 new Claim(OAuthConstants.ClaimTypes.UserId, user.UserId.ToString()),
+                new Claim(OAuthConstants.ClaimTypes.UserType, user.UserTypeId.ToString())
             };
 
             context.Result = new GrantValidationResult(

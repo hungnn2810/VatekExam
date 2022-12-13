@@ -9,7 +9,14 @@ namespace Identity.EntityFramework
 {
     public partial class UserStatuses
     {
+        public UserStatuses()
+        {
+            Users = new HashSet<Users>();
+        }
+
         public short UserStatusId { get; set; }
         public string UserStatusName { get; set; }
+
+        public virtual ICollection<Users> Users { get; set; }
     }
 }

@@ -22,7 +22,7 @@ namespace Document.EntityFramework
         public virtual DbSet<BookMarks> BookMarks { get; set; }
         public virtual DbSet<Categories> Categories { get; set; }
         public virtual DbSet<Documents> Documents { get; set; }
-        public virtual DbSet<PhysialFiles> PhysialFiles { get; set; }
+        public virtual DbSet<PhysicalFiles> PhysicalFiles { get; set; }
         public virtual DbSet<S3Buckets> S3Buckets { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -59,7 +59,7 @@ namespace Document.EntityFramework
                 entity.HasOne(d => d.Document)
                     .WithMany(p => p.BookMarks)
                     .HasForeignKey(d => d.DocumentId)
-                    .HasConstraintName("FK__book_mark__docum__68487DD7");
+                    .HasConstraintName("FK__book_mark__docum__70DDC3D8");
             });
 
             modelBuilder.Entity<Categories>(entity =>
@@ -88,17 +88,25 @@ namespace Document.EntityFramework
             modelBuilder.Entity<Documents>(entity =>
             {
                 entity.HasKey(e => e.DocumentId)
-                    .HasName("PK__document__9666E8AC60C4563F");
+                    .HasName("PK__tmp_ms_x__9666E8ACDA035EB2");
 
                 entity.ToTable("documents");
 
                 entity.Property(e => e.DocumentId).HasColumnName("document_id");
 
+                entity.Property(e => e.AuthorId)
+                    .IsRequired()
+                    .HasColumnName("author_id")
+                    .HasMaxLength(36)
+                    .IsUnicode(false)
+                    .IsFixedLength();
+
                 entity.Property(e => e.CategoryId).HasColumnName("category_id");
 
                 entity.Property(e => e.CreatedAt)
                     .HasColumnName("created_at")
-                    .HasColumnType("datetime");
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())");
 
                 entity.Property(e => e.CreatedBy)
                     .HasColumnName("created_by")
@@ -108,6 +116,8 @@ namespace Document.EntityFramework
 
                 entity.Property(e => e.Deleted).HasColumnName("deleted");
 
+                entity.Property(e => e.PhysicalFileId).HasColumnName("physical_file_id");
+
                 entity.Property(e => e.Title)
                     .IsRequired()
                     .HasColumnName("title")
@@ -116,7 +126,8 @@ namespace Document.EntityFramework
 
                 entity.Property(e => e.UpdatedAt)
                     .HasColumnName("updated_at")
-                    .HasColumnType("datetime");
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getutcdate())");
 
                 entity.Property(e => e.UpdatedBy)
                     .HasColumnName("updated_by")
@@ -128,15 +139,21 @@ namespace Document.EntityFramework
                     .WithMany(p => p.Documents)
                     .HasForeignKey(d => d.CategoryId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__documents__categ__5CD6CB2B");
+                    .HasConstraintName("FK__documents__categ__71D1E811");
+
+                entity.HasOne(d => d.PhysicalFile)
+                    .WithMany(p => p.Documents)
+                    .HasForeignKey(d => d.PhysicalFileId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__documents__physi__73BA3083");
             });
 
-            modelBuilder.Entity<PhysialFiles>(entity =>
+            modelBuilder.Entity<PhysicalFiles>(entity =>
             {
                 entity.HasKey(e => e.PhysicalFileId)
                     .HasName("PK__physial___217D551008CDBFC6");
 
-                entity.ToTable("physial_files");
+                entity.ToTable("physical_files");
 
                 entity.Property(e => e.PhysicalFileId).HasColumnName("physical_file_id");
 
@@ -145,7 +162,7 @@ namespace Document.EntityFramework
                 entity.Property(e => e.CreatedAt)
                     .HasColumnName("created_at")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
+                    .HasDefaultValueSql("(getutcdate())");
 
                 entity.Property(e => e.CreatedBy)
                     .HasColumnName("created_by")
@@ -155,11 +172,7 @@ namespace Document.EntityFramework
 
                 entity.Property(e => e.Deleted).HasColumnName("deleted");
 
-                entity.Property(e => e.DocumentId).HasColumnName("document_id");
-
                 entity.Property(e => e.FileLengthInBytes).HasColumnName("file_length_in_bytes");
-
-                entity.Property(e => e.PageNumber).HasColumnName("page_number");
 
                 entity.Property(e => e.PhysicalFileExtention)
                     .IsRequired()
@@ -184,7 +197,7 @@ namespace Document.EntityFramework
                 entity.Property(e => e.UpdatedAt)
                     .HasColumnName("updated_at")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
+                    .HasDefaultValueSql("(getutcdate())");
 
                 entity.Property(e => e.UpdatedBy)
                     .HasColumnName("updated_by")
@@ -192,14 +205,8 @@ namespace Document.EntityFramework
                     .IsUnicode(false)
                     .IsFixedLength();
 
-                entity.HasOne(d => d.Document)
-                    .WithMany(p => p.PhysialFiles)
-                    .HasForeignKey(d => d.DocumentId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__physial_f__docum__619B8048");
-
                 entity.HasOne(d => d.S3Bucket)
-                    .WithMany(p => p.PhysialFiles)
+                    .WithMany(p => p.PhysicalFiles)
                     .HasForeignKey(d => d.S3BucketId)
                     .HasConstraintName("FK__physial_f__s3_bu__60A75C0F");
             });

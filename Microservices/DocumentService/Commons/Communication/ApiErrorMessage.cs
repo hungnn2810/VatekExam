@@ -2,10 +2,9 @@
 {
     public class ApiErrorMessage
     {
-        internal ApiErrorMessage()
+        public ApiErrorMessage()
         { }
 
-        public string Code { get; set; }
         public string Value { get; set; }
     }
 }

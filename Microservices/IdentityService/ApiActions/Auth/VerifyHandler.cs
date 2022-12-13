@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IdentityService.Handlers.CHandlers
 {
-    public class VerifyHandler : IRequestHandler<ApiActionAnonymousRequest<VerifyInputModel>, IApiResponse>
+    public class VerifyHandler : IRequestHandler<ApiActionAnonymousRequest<AuthVerifyInputModel>, IApiResponse>
     {
         private readonly IdentityDbContext _dbContext;
 
@@ -22,7 +22,7 @@ namespace IdentityService.Handlers.CHandlers
             _dbContext = dbContext;
         }
 
-        public async Task<IApiResponse> Handle(ApiActionAnonymousRequest<VerifyInputModel> request, CancellationToken cancellationToken)
+        public async Task<IApiResponse> Handle(ApiActionAnonymousRequest<AuthVerifyInputModel> request, CancellationToken cancellationToken)
         {
             var confirmation = await _dbContext.ConfirmationCodes
                 .Where(x => x.ConfirmationCodeId == request.Input.ConfirmationCodeId.ToString())

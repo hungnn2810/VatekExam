@@ -22,25 +22,22 @@ namespace IdentityService.Controllers
         }
 
         [HttpPost("register")]
-        [Produces("application/json")]
         [ProducesResponseType(typeof(ApiResponseModel<ConfirmationResponseModel>), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Register([FromBody] RegisterInputModel input)
+        public async Task<IActionResult> Register([FromBody] AuthRegisterInputModel input)
         {
             return await _mediator.Send(ApiActionModel.CreateRequest(input));
         }
 
         [HttpPost("verify")]
-        [Produces("application/json")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> VerifyAccount([FromBody] VerifyInputModel input)
+        public async Task<IActionResult> VerifyAccount([FromBody] AuthVerifyInputModel input)
         {
             return await _mediator.Send(ApiActionModel.CreateRequest(input));
         }
 
         [HttpPost("login")]
-        [Produces("application/json")]
         [ProducesResponseType(typeof(ApiResponseModel<UserLoginResponseModel>), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Login([FromBody] LoginInputModel input)
+        public async Task<IActionResult> Login([FromBody] AuthLoginInputModel input)
         {
             return await _mediator.Send(ApiActionModel.CreateRequest(input));
         }

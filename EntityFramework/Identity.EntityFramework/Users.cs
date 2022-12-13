@@ -21,6 +21,7 @@ namespace Identity.EntityFramework
         public string LastName { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
+        public short? UserTypeId { get; set; }
         public short UserStatusId { get; set; }
         public bool Deleted { get; set; }
         public DateTime CreatedAt { get; set; }
@@ -28,6 +29,8 @@ namespace Identity.EntityFramework
         public string CreatedBy { get; set; }
         public string UpdatedBy { get; set; }
 
+        public virtual UserStatuses UserStatus { get; set; }
+        public virtual UserTypes UserType { get; set; }
         public virtual ICollection<ConfirmationCodes> ConfirmationCodes { get; set; }
     }
 }

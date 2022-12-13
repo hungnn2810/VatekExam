@@ -11,12 +11,12 @@ namespace Document.EntityFramework
     {
         public S3Buckets()
         {
-            PhysialFiles = new HashSet<PhysialFiles>();
+            PhysicalFiles = new HashSet<PhysicalFiles>();
         }
 
         public short S3BucketId { get; set; }
         public string S3BucketName { get; set; }
 
-        public virtual ICollection<PhysialFiles> PhysialFiles { get; set; }
+        public virtual ICollection<PhysicalFiles> PhysicalFiles { get; set; }
     }
 }

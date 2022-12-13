@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IdentityService.Handlers.CHandlers
 {
-    public class RegisterHandler : IRequestHandler<ApiActionAnonymousRequest<RegisterInputModel>, IApiResponse>
+    public class RegisterHandler : IRequestHandler<ApiActionAnonymousRequest<AuthRegisterInputModel>, IApiResponse>
     {
         private readonly IdentityDbContext _dbContext;
 
@@ -23,7 +23,7 @@ namespace IdentityService.Handlers.CHandlers
             _dbContext = dbContext;
         }
 
-        public async Task<IApiResponse> Handle(ApiActionAnonymousRequest<RegisterInputModel> request, CancellationToken cancellationToken)
+        public async Task<IApiResponse> Handle(ApiActionAnonymousRequest<AuthRegisterInputModel> request, CancellationToken cancellationToken)
         {
             // Check email existed
             var existedEmail = await _dbContext.Users
@@ -53,6 +53,7 @@ namespace IdentityService.Handlers.CHandlers
                 Email = request.Input.Email,
                 UserStatusId = (short)UserStatusEnum.WaitForVerify,
                 CreatedAt = DateTime.Now,
+                UserTypeId = 1
             };
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync(cancellationToken);

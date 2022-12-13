@@ -12,15 +12,65 @@
     <None Remove="Commons\Enums\" />
     <None Remove="Commons\Communication\" />
     <None Remove="MediatR" />
+    <None Remove="ApiModels\" />
+    <None Remove="ApiActions\" />
+    <None Remove="ApiModels\ApiInputModels\" />
+    <None Remove="ApiModels\ApiResponseModels\" />
+    <None Remove="ApiModels\ApiErrorMessages\" />
+    <None Remove="IdentityServer4.AccessTokenValidation" />
+    <None Remove="MediatR.Extensions.Microsoft.DependencyInjection" />
+    <None Remove="Helpers\" />
+    <None Remove="Helpers\Implements\" />
+    <None Remove="ApiModels\ApiInputModels\PhysicalFiles\" />
+    <None Remove="ApiModels\ApiInputModels\Categories\" />
+    <None Remove="ApiModels\ApiInputModels\Documents\" />
+    <None Remove="ApiModels\ApiInputModels\Bookmarks\" />
+    <None Remove="ApiActions\CategoryActions\" />
+    <None Remove="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <None Remove="Serilog.AspNetCore" />
+    <None Remove="Services\" />
+    <None Remove="Services\Implements\" />
+    <None Remove="AWSSDK.S3" />
+    <None Remove="ApiActions\PhysicalFileActions\" />
+    <None Remove="ApiActions\DocumentActions\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="MediatR" Version="11.1.0" />
+    <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.31" />
+    <PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.101.34" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Commons\" />
     <Folder Include="Commons\Constants\" />
     <Folder Include="Commons\Enums\" />
     <Folder Include="Commons\Communication\" />
+    <Folder Include="ApiModels\" />
+    <Folder Include="ApiActions\" />
+    <Folder Include="ApiModels\ApiInputModels\" />
+    <Folder Include="ApiModels\ApiResponseModels\" />
+    <Folder Include="ApiModels\ApiErrorMessages\" />
+    <Folder Include="Helpers\" />
+    <Folder Include="Helpers\Implements\" />
+    <Folder Include="ApiModels\ApiInputModels\PhysicalFiles\" />
+    <Folder Include="ApiModels\ApiInputModels\Categories\" />
+    <Folder Include="ApiModels\ApiInputModels\Documents\" />
+    <Folder Include="ApiModels\ApiInputModels\Bookmarks\" />
+    <Folder Include="ApiActions\CategoryActions\" />
+    <Folder Include="Services\" />
+    <Folder Include="Services\Implements\" />
+    <Folder Include="ApiActions\PhysicalFileActions\" />
+    <Folder Include="ApiActions\DocumentActions\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\EntityFramework\Document.EntityFramework\Document.EntityFramework.csproj">
+      <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+    </ProjectReference>
+    <ProjectReference Include="..\..\EntityFramework\Identity.EntityFramework\Identity.EntityFramework.csproj">
+      <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+    </ProjectReference>
   </ItemGroup>
 </Project>

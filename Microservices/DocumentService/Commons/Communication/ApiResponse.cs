@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DocumentService.Commons.Communication
@@ -40,6 +41,19 @@ namespace DocumentService.Commons.Communication
             }, statusCode);
         }
 
+        public static JsonActionResult CreatePagingModel<TResponse>(IEnumerable<TResponse> data, ApiResponsePaging paging, HttpStatusCode statusCode = HttpStatusCode.OK, ApiResponseMetadata metadata = null)
+            where TResponse : IApiResponseData, new()
+        {
+            return new JsonActionResult(new ApiPagingResponseModel<TResponse>
+            {
+                Data = new ApiResponseArrayWithPaging<TResponse>(data, paging),
+                Metadata = metadata ?? new ApiResponseMetadata
+                {
+                    Success = true
+                }
+            }, statusCode);
+        }
+
         public static JsonActionResult CreateErrorModel(HttpStatusCode statusCode, ApiErrorMessage message)
         {
             return new JsonActionResult(new
@@ -47,7 +61,7 @@ namespace DocumentService.Commons.Communication
                 Metadata = new ApiResponseMetadata
                 {
                     Success = false,
-                    Message = message
+                    Message = message.Value
                 }
             }, statusCode);
         }

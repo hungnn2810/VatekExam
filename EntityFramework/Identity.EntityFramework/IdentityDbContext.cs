@@ -44,10 +44,16 @@ namespace Identity.EntityFramework
         public virtual DbSet<IdentityResources> IdentityResources { get; set; }
         public virtual DbSet<PersistedGrants> PersistedGrants { get; set; }
         public virtual DbSet<UserStatuses> UserStatuses { get; set; }
+        public virtual DbSet<UserTypes> UserTypes { get; set; }
         public virtual DbSet<Users> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
+                optionsBuilder.UseSqlServer("Server=localhost;Database=VatekExam_Identity;User Id=sa;Password=Hung2001@");
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -344,7 +350,7 @@ namespace Identity.EntityFramework
             modelBuilder.Entity<ConfirmationCodes>(entity =>
             {
                 entity.HasKey(e => e.ConfirmationCodeId)
-                    .HasName("PK__confirma__995DB9F0ABF852AD");
+                    .HasName("PK__confirma__995DB9F0415A84DF");
 
                 entity.ToTable("confirmation_codes");
 
@@ -364,7 +370,7 @@ namespace Identity.EntityFramework
                 entity.Property(e => e.CreatedAt)
                     .HasColumnName("created_at")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
+                    .HasDefaultValueSql("(getutcdate())");
 
                 entity.Property(e => e.CreatedBy)
                     .HasColumnName("created_by")
@@ -379,7 +385,7 @@ namespace Identity.EntityFramework
                 entity.Property(e => e.UpdatedAt)
                     .HasColumnName("updated_at")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
+                    .HasDefaultValueSql("(getutcdate())");
 
                 entity.Property(e => e.UpdatedBy)
                     .HasColumnName("updated_by")
@@ -505,7 +511,7 @@ namespace Identity.EntityFramework
             modelBuilder.Entity<UserStatuses>(entity =>
             {
                 entity.HasKey(e => e.UserStatusId)
-                    .HasName("PK__user_sta__8E5BDDEF4317F685");
+                    .HasName("PK__user_sta__8E5BDDEF03204671");
 
                 entity.ToTable("user_statuses");
 
@@ -520,10 +526,28 @@ namespace Identity.EntityFramework
                     .IsUnicode(false);
             });
 
+            modelBuilder.Entity<UserTypes>(entity =>
+            {
+                entity.HasKey(e => e.UserTypeId)
+                    .HasName("PK__user_typ__9424CFA68188AE5C");
+
+                entity.ToTable("user_types");
+
+                entity.Property(e => e.UserTypeId)
+                    .HasColumnName("user_type_id")
+                    .ValueGeneratedNever();
+
+                entity.Property(e => e.UserTypeName)
+                    .IsRequired()
+                    .HasColumnName("user_type_name")
+                    .HasMaxLength(128)
+                    .IsUnicode(false);
+            });
+
             modelBuilder.Entity<Users>(entity =>
             {
                 entity.HasKey(e => e.UserId)
-                    .HasName("PK__users__B9BE370F073812BA");
+                    .HasName("PK__users__B9BE370F0A13C9B3");
 
                 entity.ToTable("users");
 
@@ -536,7 +560,7 @@ namespace Identity.EntityFramework
                 entity.Property(e => e.CreatedAt)
                     .HasColumnName("created_at")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
+                    .HasDefaultValueSql("(getutcdate())");
 
                 entity.Property(e => e.CreatedBy)
                     .HasColumnName("created_by")
@@ -578,7 +602,7 @@ namespace Identity.EntityFramework
                 entity.Property(e => e.UpdatedAt)
                     .HasColumnName("updated_at")
                     .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
+                    .HasDefaultValueSql("(getutcdate())");
 
                 entity.Property(e => e.UpdatedBy)
                     .HasColumnName("updated_by")
@@ -593,6 +617,19 @@ namespace Identity.EntityFramework
                     .IsUnicode(false);
 
                 entity.Property(e => e.UserStatusId).HasColumnName("user_status_id");
+
+                entity.Property(e => e.UserTypeId).HasColumnName("user_type_id");
+
+                entity.HasOne(d => d.UserStatus)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.UserStatusId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_user_status_id");
+
+                entity.HasOne(d => d.UserType)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.UserTypeId)
+                    .HasConstraintName("FK_user_type_id");
             });
 
             OnModelCreatingPartial(modelBuilder);

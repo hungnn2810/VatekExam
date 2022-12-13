@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IdentityService.ApiActions.Auth
 {
-    public class ResendConfirmationHandler : IRequestHandler<ApiActionAnonymousRequest<ResendConfirmationInputModel>, IApiResponse>
+    public class ResendConfirmationHandler : IRequestHandler<ApiActionAnonymousRequest<AuthResendConfirmationInputModel>, IApiResponse>
     {
         private readonly IdentityDbContext _dbContext;
 
@@ -19,7 +19,7 @@ namespace IdentityService.ApiActions.Auth
             _dbContext = dbContext;
         }
              
-        public async Task<IApiResponse> Handle(ApiActionAnonymousRequest<ResendConfirmationInputModel> request, CancellationToken cancellationToken)
+        public async Task<IApiResponse> Handle(ApiActionAnonymousRequest<AuthResendConfirmationInputModel> request, CancellationToken cancellationToken)
         {
             //var confirmationCode = await _dbContext.ConfirmationCodes
             //    .Where(x => x.ConfirmationCodeId == request.Input.ConfirmationCodeId.ToString())

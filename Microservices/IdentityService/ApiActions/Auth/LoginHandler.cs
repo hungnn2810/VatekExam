@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Identity.EntityFramework;
 using IdentityModel.Client;
+using IdentityServer4;
 using IdentityService.ApiModel.ApiErrorMessages;
 using IdentityService.ApiModels.ApiInputModels.Auth;
 using IdentityService.ApiModels.ApiResponseModels;
@@ -16,7 +17,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IdentityService.Handlers.CHandlers
 {
-    public class LoginHandler : IRequestHandler<ApiActionAnonymousRequest<LoginInputModel>, IApiResponse>
+    public class LoginHandler : IRequestHandler<ApiActionAnonymousRequest<AuthLoginInputModel>, IApiResponse>
     {
         private readonly IdentityDbContext _dbContext;
         private readonly TokenClient _tokenClient;
@@ -27,9 +28,9 @@ namespace IdentityService.Handlers.CHandlers
             _tokenClient = tokenClient;
         }
 
-        public async Task<IApiResponse> Handle(ApiActionAnonymousRequest<LoginInputModel> request, CancellationToken cancellationToken)
+        public async Task<IApiResponse> Handle(ApiActionAnonymousRequest<AuthLoginInputModel> request, CancellationToken cancellationToken)
         {
-            var token = await _tokenClient.RequestPasswordTokenAsync(request.Input.UserName, request.Input.Password, "main.read_write", cancellationToken: cancellationToken);
+            var token = await _tokenClient.RequestPasswordTokenAsync(request.Input.UserName, request.Input.Password, scope: "main.read_write offline_access", cancellationToken: cancellationToken);
 
             if (token.IsError)
             {

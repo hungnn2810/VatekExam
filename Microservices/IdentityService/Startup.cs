@@ -1,20 +1,29 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using Identity.EntityFramework;
+using IdentityModel;
+using IdentityModel.AspNetCore.OAuth2Introspection;
 using IdentityModel.Client;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
+using IdentityServer4.EntityFramework.Stores;
 using IdentityService.Commons.Constants;
+using IdentityService.Services;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using Serilog;
 
 namespace IdentityService
 {
@@ -57,26 +66,34 @@ namespace IdentityService
                 .AddDeveloperSigningCredential()
                 .AddConfigurationStore(options =>
                 {
-                    options.ConfigureDbContext = b => b.UseSqlServer(AppSettingConstants.ConnectionStrings.IdentityDbConnection,
+                    options.ConfigureDbContext = b => b.UseSqlServer(AppSettingConstants.ConnectionStrings.IdentityDb,
                         sql => sql.MigrationsAssembly(migrationsAssembly));
                 })
                 .AddOperationalStore(options =>
                 {
-                    options.ConfigureDbContext = b => b.UseSqlServer(AppSettingConstants.ConnectionStrings.IdentityDbConnection,
+                    options.ConfigureDbContext = b => b.UseSqlServer(AppSettingConstants.ConnectionStrings.IdentityDb,
                         sql => sql.MigrationsAssembly(migrationsAssembly));
                 })
-                .AddInMemoryCaching()
-                .AddClientStoreCache<IdentityServer4.EntityFramework.Stores.ClientStore>()
                 .AddConfigurationStoreCache()
-                .AddResourceStoreCache<IdentityServer4.EntityFramework.Stores.ResourceStore>()
-                .AddResourceOwnerValidator<Services.ResourceOwnerPasswordValidator>();
+                .AddClientStoreCache<ClientStore>()
+                .AddResourceStoreCache<ResourceStore>()
+                .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
+                .AddProfileService<ProfileService>();
 
             services
                 .AddAuthentication(AppSettingConstants.IdentityServer.DefaultScheme)
                 .AddIdentityServerAuthentication(options =>
                 {
                     options.Authority = AppSettingConstants.IdentityServer.Authority;
+                    options.ApiName = AppSettingConstants.IdentityServer.ApiName;
+                    options.ApiSecret = AppSettingConstants.IdentityServer.ApiSecret;
                     options.RequireHttpsMetadata = false;
+                    options.TokenRetriever = new Func<HttpRequest, string>(req =>
+                    {
+                        var fromHeader = TokenRetrieval.FromAuthorizationHeader();
+                        var fromQuery = TokenRetrieval.FromQueryString();
+                        return fromHeader(req) ?? fromQuery(req);
+                    });
                 });
 
             services
@@ -91,7 +108,7 @@ namespace IdentityService
 
             services.AddDbContext<IdentityDbContext>(options =>
             {
-                options.UseSqlServer(AppSettingConstants.ConnectionStrings.IdentityDbConnection);
+                options.UseSqlServer(AppSettingConstants.ConnectionStrings.IdentityDb);
             });
 
             services.AddMediatR(typeof(Startup).GetTypeInfo().Assembly);
@@ -102,6 +119,16 @@ namespace IdentityService
         {
             // this will do the initial DB population
             InitializeDatabase(app);
+
+            // ref: https://github.com/IdentityServer/IdentityServer4/issues/1331#issuecomment-317049214
+            var forwardOptions = new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+                RequireHeaderSymmetry = false
+            };
+            forwardOptions.KnownNetworks.Clear();
+            forwardOptions.KnownProxies.Clear();
+            app.UseForwardedHeaders(forwardOptions);
 
             app.UseIdentityServer();
 
@@ -114,11 +141,16 @@ namespace IdentityService
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Identity service");
                 });
             }
-            app.UseHttpsRedirection();
+
+            app.UseRouting();
 
             app.UseAuthentication();
-
             app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
 
             app.UseMvc();
         }
@@ -132,15 +164,6 @@ namespace IdentityService
                 var context = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
                 context.Database.Migrate();
 
-                if (!context.Clients.Any())
-                {
-                    foreach (var client in Config.Clients)
-                    {
-                        context.Clients.Add(client.ToEntity());
-                    }
-                    context.SaveChanges();
-                }
-
                 if (!context.IdentityResources.Any())
                 {
                     foreach (var resource in Config.IdentityResources)
@@ -152,11 +175,10 @@ namespace IdentityService
 
                 if (!context.ApiScopes.Any())
                 {
-                    foreach (var resource in Config.ApiScopes)
+                    foreach (var scope in Config.ApiScopes)
                     {
-                        context.ApiScopes.Add(resource.ToEntity());
+                        context.ApiScopes.Add(scope.ToEntity());
                     }
-                    context.SaveChanges();
                 }
 
                 if (!context.ApiResources.Any())
@@ -164,6 +186,15 @@ namespace IdentityService
                     foreach (var resource in Config.ApiResources)
                     {
                         context.ApiResources.Add(resource.ToEntity());
+                    }
+                    context.SaveChanges();
+                }
+
+                if (!context.Clients.Any())
+                {
+                    foreach (var client in Config.Clients)
+                    {
+                        context.Clients.Add(client.ToEntity());
                     }
                     context.SaveChanges();
                 }

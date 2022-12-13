@@ -12,12 +12,13 @@ namespace Document.EntityFramework
         public Documents()
         {
             BookMarks = new HashSet<BookMarks>();
-            PhysialFiles = new HashSet<PhysialFiles>();
         }
 
         public long DocumentId { get; set; }
         public long CategoryId { get; set; }
         public string Title { get; set; }
+        public string AuthorId { get; set; }
+        public long PhysicalFileId { get; set; }
         public bool Deleted { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -25,7 +26,7 @@ namespace Document.EntityFramework
         public string UpdatedBy { get; set; }
 
         public virtual Categories Category { get; set; }
+        public virtual PhysicalFiles PhysicalFile { get; set; }
         public virtual ICollection<BookMarks> BookMarks { get; set; }
-        public virtual ICollection<PhysialFiles> PhysialFiles { get; set; }
     }
 }
