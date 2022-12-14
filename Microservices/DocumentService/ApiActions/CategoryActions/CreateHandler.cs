@@ -1,10 +1,10 @@
 ﻿using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Document.EntityFramework;
 using DocumentService.ApiModels.ApiErrorMessages;
 using DocumentService.ApiModels.ApiInputModels.Categories;
 using DocumentService.Commons.Communication;
+using EntityFramework.Document;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,7 +23,7 @@ namespace DocumentService.ApiActions.CategoryActions
         {
             // Check duplicate name
             var duplicateName = await _dbContext.Categories
-                .AnyAsync(x => x.CategoryName == request.Input.CategoryName && !x.Deleted, cancellationToken);
+                .AnyAsync(x => !x.Deleted && x.CategoryName == request.Input.CategoryName, cancellationToken);
 
             if (duplicateName)
             {
@@ -33,7 +33,9 @@ namespace DocumentService.ApiActions.CategoryActions
             _dbContext.Categories.Add(new Categories
             {
                 CategoryName = request.Input.CategoryName,
-                Visible = request.Input.Visible
+                Visible = request.Input.Visible,
+                CreatedBy = request.UserId.ToString(),
+                CreatedAt = System.DateTime.UtcNow
             });
             await _dbContext.SaveChangesAsync(cancellationToken);
 

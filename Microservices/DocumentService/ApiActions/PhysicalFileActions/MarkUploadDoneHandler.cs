@@ -2,11 +2,11 @@
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Document.EntityFramework;
 using DocumentService.ApiModels.ApiErrorMessages;
 using DocumentService.ApiModels.ApiInputModels.PhysicalFiles;
 using DocumentService.Commons.Communication;
 using DocumentService.Services;
+using EntityFramework.Document;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,25 +25,35 @@ namespace DocumentService.ApiActions.PhysicalFileActions
 
         public async Task<IApiResponse> Handle(ApiActionAuthenticateRequest<PhysicalFileMarkUploadDoneInputModel> request, CancellationToken cancellationToken)
         {
-            var file = await _dbContext.PhysicalFiles
-                  .Where(pf => !pf.Deleted && pf.PhysicalFileId == request.Input.PhysicalFileId)
+            var files = await _dbContext.PhysicalFiles
+                  .Where(pf => !pf.Deleted && request.Input.PhysicalFileIds.Contains(pf.PhysicalFileId))
                   .Select(pf => new { pf, pf.S3Bucket })
-                  .FirstOrDefaultAsync(cancellationToken);
+                  .ToArrayAsync(cancellationToken);
 
-            if (file == null)
+            if (files.Length != request.Input.PhysicalFileIds.Length)
             {
                 return ApiResponse.CreateErrorModel(HttpStatusCode.BadRequest, ApiInternalErrorMessages.PhysicalFileNotFound);
             }
 
-            var fileStat = await _s3Service.GetStat(file.S3Bucket.S3BucketName, file.pf.S3FileKey, cancellationToken);
-            if (fileStat == null || fileStat.ContentLength != file.pf.FileLengthInBytes)
+            using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+            // Check file length
+            foreach (var file in files)
             {
-                return ApiResponse.CreateErrorModel(HttpStatusCode.BadRequest, ApiInternalErrorMessages.FileCorrupted);
+                var fileStat = await _s3Service.GetStat(file.S3Bucket.S3BucketName, file.pf.S3FileKey, cancellationToken);
+                if (fileStat == null || fileStat.ContentLength != file.pf.FileLengthInBytes)
+                {
+                    return ApiResponse.CreateErrorModel(HttpStatusCode.BadRequest, ApiInternalErrorMessages.FileCorrupted);
+                }
+
+                file.pf.Active = true;
+                file.pf.UpdatedBy = request.UserId.ToString();
+                file.pf.UpdatedAt = System.DateTime.UtcNow;
+                _dbContext.PhysicalFiles.Update(file.pf);
             }
 
-            file.pf.Active = true;
-            _dbContext.PhysicalFiles.Update(file.pf);
             await _dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
 
             return ApiResponse.CreateModel(HttpStatusCode.OK);
         }

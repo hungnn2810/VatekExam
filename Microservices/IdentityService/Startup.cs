@@ -1,9 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
-using Identity.EntityFramework;
-using IdentityModel;
+using EntityFramework.Identity;
 using IdentityModel.AspNetCore.OAuth2Introspection;
 using IdentityModel.Client;
 using IdentityServer4.EntityFramework.DbContexts;
@@ -20,10 +20,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
-using Serilog;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace IdentityService
 {
@@ -59,6 +58,8 @@ namespace IdentityService
                     Version = "v1",
                     Title = "Identity service"
                 });
+                options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Identity.Service.xml"));
+                options.OperationFilter<AppendAuthorizeToSummaryOperationFilter>();
             });
 
             services

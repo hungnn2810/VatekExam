@@ -40,7 +40,7 @@ namespace IdentityService
                 {
                     ClientId = AppSettingConstants.IdentityServer.ClientId,
                     ClientSecrets = { new Secret (AppSettingConstants.IdentityServer.ClientSecret.Sha256()) },
-                    AllowedGrantTypes = new List<string> { GrantType.ClientCredentials, GrantType.ResourceOwnerPassword, OAuthConstants.ExtendGrantType.ApiRequest },
+                    AllowedGrantTypes = new List<string> { GrantType.ClientCredentials, GrantType.ResourceOwnerPassword },
                     AllowedScopes = {
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,

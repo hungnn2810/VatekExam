@@ -3,7 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Identity.EntityFramework;
+using EntityFramework.Identity;
 using IdentityService.ApiModel.ApiErrorMessages;
 using IdentityService.ApiModels.ApiInputModels.Auth;
 using IdentityService.Commoms.Enums;
@@ -33,7 +33,7 @@ namespace IdentityService.Handlers.CHandlers
                 return ApiResponse.CreateErrorModel(HttpStatusCode.BadRequest, ApiInternalErrorMessages.InvalidConfirmationCode);
             }
 
-            if (confirmation.ExpiredTime < DateTime.Now)
+            if (confirmation.ExpiredTime < DateTime.UtcNow)
             {
                 return ApiResponse.CreateErrorModel(HttpStatusCode.BadRequest, ApiInternalErrorMessages.ConfirmationCodeExpired);
             }
@@ -54,9 +54,12 @@ namespace IdentityService.Handlers.CHandlers
             }
 
             user.UserStatusId = (short)UserStatusEnum.Normal;
-            user.UpdatedAt = DateTime.Now;
+            user.UpdatedAt = DateTime.UtcNow;
             user.UpdatedBy = user.UserId;
             _dbContext.Users.Update(user);
+
+            _dbContext.ConfirmationCodes.Remove(confirmation);
+
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             return ApiResponse.CreateModel(HttpStatusCode.OK);

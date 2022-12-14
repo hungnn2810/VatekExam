@@ -1,16 +1,16 @@
 ﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Document.EntityFramework;
 using DocumentService.ApiModels.ApiInputModels.Categories;
 using DocumentService.ApiModels.ApiResponseModels;
 using DocumentService.Commons.Communication;
+using EntityFramework.Document;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace DocumentService.ApiActions.CategoryActions
 {
-    public class SearchHandler : IRequestHandler<ApiActionAnonymousRequest<CategorySearchInputModel>, IApiResponse>
+    public class SearchHandler : IRequestHandler<ApiActionAuthenticateRequest<CategorySearchInputModel>, IApiResponse>
     {
         private readonly DocumentDbContext _dbContext;
 
@@ -19,10 +19,10 @@ namespace DocumentService.ApiActions.CategoryActions
             _dbContext = dbContext;
         }
 
-        public async Task<IApiResponse> Handle(ApiActionAnonymousRequest<CategorySearchInputModel> request, CancellationToken cancellationToken)
+        public async Task<IApiResponse> Handle(ApiActionAuthenticateRequest<CategorySearchInputModel> request, CancellationToken cancellationToken)
         {
             var query = from c in _dbContext.Categories
-                        where !c.Deleted & c.Visible.Value
+                        where !c.Deleted
                         select c;
 
             if (!string.IsNullOrEmpty(request.Input.Keyword) && request.Input.Keyword.Length >= 2)
@@ -37,16 +37,17 @@ namespace DocumentService.ApiActions.CategoryActions
             var requestPaging = new ApiResponsePaging(request.Input.PageSize, request.Input.PageNumber, totalItems);
 
             var result = await query
-                .Skip(requestPaging.PageSize * (requestPaging.PageNumber - 1))
-                .Take(requestPaging.PageSize)
+                .Skip(totalItems * (requestPaging.PageNumber - 1))
+                .Take(requestPaging.PageNumber)
                 .ToListAsync(cancellationToken);
 
             return ApiResponse.CreatePagingModel(
                 result.Select(x => new CategoryResponseModel
                 {
                     CategoryId = x.CategoryId,
-                    CategoryName = x.CategoryName
-                }).ToList(),
+                    CategoryName = x.CategoryName,
+                    Visible = x.Visible
+                }).ToArray(),
                 requestPaging);
         }
     }

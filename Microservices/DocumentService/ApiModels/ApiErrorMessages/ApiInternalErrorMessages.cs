@@ -9,9 +9,9 @@ namespace DocumentService.ApiModels.ApiErrorMessages
             Value = "Duplicated category name"
         };
 
-        public static ApiErrorMessage DuplicatedDocumentName => new ApiErrorMessage
+        public static ApiErrorMessage DuplicatedDocumentTitle => new ApiErrorMessage
         {
-            Value = "Duplicated document name"
+            Value = "Duplicated document title"
         };
 
         public static ApiErrorMessage FileCorrupted => new ApiErrorMessage

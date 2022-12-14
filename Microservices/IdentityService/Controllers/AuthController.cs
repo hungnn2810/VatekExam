@@ -21,6 +21,11 @@ namespace IdentityService.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Register new user
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         [HttpPost("register")]
         [ProducesResponseType(typeof(ApiResponseModel<ConfirmationResponseModel>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Register([FromBody] AuthRegisterInputModel input)
@@ -28,6 +33,11 @@ namespace IdentityService.Controllers
             return await _mediator.Send(ApiActionModel.CreateRequest(input));
         }
 
+        /// <summary>
+        /// Verify new user
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         [HttpPost("verify")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> VerifyAccount([FromBody] AuthVerifyInputModel input)
@@ -35,6 +45,11 @@ namespace IdentityService.Controllers
             return await _mediator.Send(ApiActionModel.CreateRequest(input));
         }
 
+        /// <summary>
+        /// Login by username & password
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         [HttpPost("login")]
         [ProducesResponseType(typeof(ApiResponseModel<UserLoginResponseModel>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Login([FromBody] AuthLoginInputModel input)
@@ -42,13 +57,17 @@ namespace IdentityService.Controllers
             return await _mediator.Send(ApiActionModel.CreateRequest(input));
         }
 
-        //[HttpPost("resend-confirmation")]
-        //[Produces("application/json")]
-        //[ProducesResponseType(typeof(ApiResponseModel<ConfirmationResponseModel>), (int)HttpStatusCode.OK)]
-        //public async Task<IActionResult> ResendConfirmation([FromBody] ResendConfirmationInputModel)
-        //{
-        //    return await _mediator
-        //}
+        /// <summary>
+        /// Resend confirmation code
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        [HttpPost("resend-confirmation")]
+        [ProducesResponseType(typeof(ApiResponseModel<ConfirmationResponseModel>), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> ResendConfirmation([FromBody] AuthResendConfirmationInputModel input)
+        {
+            return await _mediator.Send(ApiActionModel.CreateRequest(input));
+        }
     }
 }
 

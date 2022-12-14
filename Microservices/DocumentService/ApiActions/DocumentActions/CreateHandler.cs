@@ -1,11 +1,11 @@
-﻿using System;
+﻿using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Document.EntityFramework;
 using DocumentService.ApiModels.ApiErrorMessages;
 using DocumentService.ApiModels.ApiInputModels.Documents;
 using DocumentService.Commons.Communication;
+using EntityFramework.Document;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,28 +38,43 @@ namespace DocumentService.ApiActions.DocumentActions
 
             if (duplicateName)
             {
-                return ApiResponse.CreateErrorModel(HttpStatusCode.BadRequest, ApiInternalErrorMessages.DuplicatedDocumentName);
+                return ApiResponse.CreateErrorModel(HttpStatusCode.BadRequest, ApiInternalErrorMessages.DuplicatedDocumentTitle);
             }
 
-            var existFile = await _dbContext.PhysicalFiles
-                .AnyAsync(x => !x.Deleted && x.Active &&
-                    x.PhysicalFileId == request.Input.PhysicalFileId, cancellationToken);
+            var fileIdCount = await _dbContext.PhysicalFiles
+                .CountAsync(x => !x.Deleted && x.Active &&
+                    request.Input.PhysicalFileIds.Contains(x.PhysicalFileId),
+                    cancellationToken);
 
-            if (!existFile)
+            if (fileIdCount != request.Input.PhysicalFileIds.Length)
             {
                 return ApiResponse.CreateErrorModel(HttpStatusCode.BadRequest, ApiInternalErrorMessages.PhysicalFileNotFound);
             }
             #endregion
 
-            _dbContext.Documents.Add(new Documents
+            using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+            var document = new Documents
             {
                 CategoryId = request.Input.CategoryId,
                 Title = request.Input.Title,
                 AuthorId = request.UserId.ToString(),
-                PhysicalFileId = request.Input.PhysicalFileId,
-                CreatedBy = request.UserId.ToString()
-            });
+                CreatedBy = request.UserId.ToString(),
+                CreatedAt = System.DateTime.UtcNow
+            };
+            _dbContext.Documents.Add(document);
             await _dbContext.SaveChangesAsync(cancellationToken);
+
+            var documentPages = request.Input.PhysicalFileIds
+                .Select((fileId, index) => new DocumentPages
+                {
+                    DocumentId = document.DocumentId,
+                    PhysicalFileId = fileId,
+                    PageNumber = index + 1
+                });
+            await _dbContext.DocumentPages.BulkInsertAsync(documentPages);
+
+            await transaction.CommitAsync(cancellationToken);
 
             return ApiResponse.CreateModel(HttpStatusCode.OK);
         }

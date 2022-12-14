@@ -41,6 +41,19 @@ namespace DocumentService.Commons.Communication
             }, statusCode);
         }
 
+        public static JsonActionResult CreateModel<TResponse>(IEnumerable<TResponse> data, HttpStatusCode statusCode = HttpStatusCode.OK, ApiResponseMetadata metadata = null)
+             where TResponse : IApiResponseData, new()
+        {
+            return new JsonActionResult(new ApiArrayResponseModel<TResponse>
+            {
+                Data = data,
+                Metadata = metadata ?? new ApiResponseMetadata
+                {
+                    Success = true
+                }
+            }, statusCode);
+        }
+
         public static JsonActionResult CreatePagingModel<TResponse>(IEnumerable<TResponse> data, ApiResponsePaging paging, HttpStatusCode statusCode = HttpStatusCode.OK, ApiResponseMetadata metadata = null)
             where TResponse : IApiResponseData, new()
         {

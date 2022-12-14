@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Identity.EntityFramework;
+using EntityFramework.Identity;
 using IdentityServer4.Models;
 using IdentityServer4.Validation;
 using IdentityService.Commons.Constants;

@@ -13,7 +13,7 @@ namespace DocumentService.ApiModels.ApiInputModels.Documents
         public long CategoryId { get; set; }
 
         [Required]
-        public long PhysicalFileId { get; set; }
+        public long[] PhysicalFileIds { get; set; }
     }
 }
 

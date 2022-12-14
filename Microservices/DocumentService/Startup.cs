@@ -1,29 +1,27 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Text.Json;
-using Document.EntityFramework;
 using DocumentService.Commons.Constants;
 using DocumentService.Commons.Enums;
 using DocumentService.Helpers;
 using DocumentService.Helpers.Implements;
 using DocumentService.Services;
+using DocumentService.Services.Hubs;
 using DocumentService.Services.Implements;
-using Identity.EntityFramework;
-using IdentityModel;
+using EntityFramework.Document;
+using EntityFramework.Identity;
 using IdentityModel.AspNetCore.OAuth2Introspection;
-using IdentityModel.Client;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace DocumentService
 {
@@ -57,6 +55,8 @@ namespace DocumentService
                     Version = "v1",
                     Title = "Document service"
                 });
+                options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Document.Service.xml"));
+                options.OperationFilter<AppendAuthorizeToSummaryOperationFilter>();
             });
 
             services
@@ -77,11 +77,11 @@ namespace DocumentService
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("SuperAdminOnly", policy =>
+                options.AddPolicy("AdminOnly", policy =>
                 {
                     policy.RequireAuthenticatedUser();
                     policy.RequireClaim(OAuthConstants.ClaimTypes.UserType,
-                        UserTypeEnum.SuperAdmin.ToString("d"));
+                        UserTypeEnum.Admin.ToString("d"));
                 });
 
                 options.AddPolicy("UserOnly", policy =>
@@ -113,7 +113,11 @@ namespace DocumentService
 
             // Scoped services
             services
-                .AddScoped<ICurrentHttpContext, CurrentHttpContext>();
+                .AddScoped<DocumentHub>()
+                .AddScoped<ICurrentHttpContext, CurrentHttpContext>()
+                .AddScoped<INotificationService, NotificationService>();
+
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -137,6 +141,7 @@ namespace DocumentService
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<DocumentHub>("/notifyhub/document");
             });
 
             app.UseMvc();

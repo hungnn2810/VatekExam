@@ -6,7 +6,7 @@ namespace DocumentService.ApiModels.ApiInputModels.PhysicalFiles
     public class PhysicalFileMarkUploadDoneInputModel : IApiInput
     {
         [Required]
-        public long PhysicalFileId { get; set; }
+        public long[] PhysicalFileIds { get; set; }
     }
 }
 

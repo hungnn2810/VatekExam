@@ -14,11 +14,6 @@
             public const string UserId = "userId";
             public const string UserType = "userType";
         }
-
-        public static class ExtendGrantType
-        {
-            public const string ApiRequest = "Api_request";
-        }
     }
 }
 

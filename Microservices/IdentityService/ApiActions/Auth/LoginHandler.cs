@@ -3,9 +3,8 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Identity.EntityFramework;
+using EntityFramework.Identity;
 using IdentityModel.Client;
-using IdentityServer4;
 using IdentityService.ApiModel.ApiErrorMessages;
 using IdentityService.ApiModels.ApiInputModels.Auth;
 using IdentityService.ApiModels.ApiResponseModels;
@@ -54,7 +53,7 @@ namespace IdentityService.Handlers.CHandlers
             }
 
             var user = await _dbContext.Users
-                .Where(u => u.UserId == userIdValue.ToString())
+                .Where(u => !u.Deleted && u.UserId == userIdValue.ToString())
                 .Select(u => new
                 {
                     u.UserId,

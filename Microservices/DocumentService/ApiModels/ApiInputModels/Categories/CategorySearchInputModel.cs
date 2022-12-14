@@ -1,14 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using DocumentService.Commons.Communication;
 
 namespace DocumentService.ApiModels.ApiInputModels.Categories
 {
     public class CategorySearchInputModel : IApiInput
     {
-        [Required]
+        [Range(1, 100)]
         public int PageSize { get; set; }
 
-        [Required]
+        [Range(1, int.MaxValue)]
         public int PageNumber { get; set; }
 
         public string Keyword { get; set; }

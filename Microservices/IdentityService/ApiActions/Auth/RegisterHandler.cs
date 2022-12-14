@@ -2,12 +2,13 @@
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Identity.EntityFramework;
+using EntityFramework.Identity;
 using IdentityService.ApiModel.ApiErrorMessages;
 using IdentityService.ApiModels.ApiInputModels.Auth;
 using IdentityService.ApiModels.ApiResponseModels;
 using IdentityService.Commoms.Enums;
 using IdentityService.Commons.Communication;
+using IdentityService.Commons.Enums;
 using IdentityService.Commons.Utils;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +43,8 @@ namespace IdentityService.Handlers.CHandlers
                 return ApiResponse.CreateErrorModel(HttpStatusCode.BadRequest, ApiInternalErrorMessages.UserNameAlreadyExisted);
             }
 
+            using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+
             // Add new user
             var user = new Users
             {
@@ -52,31 +55,26 @@ namespace IdentityService.Handlers.CHandlers
                 LastName = request.Input.LastName,
                 Email = request.Input.Email,
                 UserStatusId = (short)UserStatusEnum.WaitForVerify,
+                UserTypeId = (short)UserTypeEnum.User,
                 CreatedAt = DateTime.Now,
-                UserTypeId = 1
             };
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             // Create confirmation code
-
             var verifyCode = new Random().Next(100000, 999999);
-            do
-            {
-
-            }
-            while (CheckExistedCode(verifyCode.ToString()).Result);
-
             var confirmationCodeId = Guid.NewGuid();
             var newConfirmationCode = new ConfirmationCodes
             {
                 ConfirmationCodeId = confirmationCodeId.ToString(),
                 UserId = user.UserId,
                 ConfirmationCode = verifyCode.ToString(),
-                ExpiredTime = DateTime.Now.AddHours(1),
+                ExpiredTime = DateTime.UtcNow.AddMinutes(10),
             };
             _dbContext.ConfirmationCodes.Add(newConfirmationCode);
             await _dbContext.SaveChangesAsync();
+
+            await transaction.CommitAsync(cancellationToken);
 
             return ApiResponse.CreateModel(new ConfirmationResponseModel
             {
@@ -84,15 +82,6 @@ namespace IdentityService.Handlers.CHandlers
                 ConfirmationCode = verifyCode.ToString(),
                 ExpiredTime = newConfirmationCode.ExpiredTime
             });
-        }
-
-        private async Task<bool> CheckExistedCode(string confirmationCode)
-        {
-            var res = await _dbContext.ConfirmationCodes
-                .AnyAsync(x => x.ConfirmationCode == confirmationCode &&
-                    x.ExpiredTime < DateTime.Now);
-
-            return res;
         }
     }
 

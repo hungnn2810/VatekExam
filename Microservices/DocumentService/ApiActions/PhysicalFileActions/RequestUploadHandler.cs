@@ -3,13 +3,13 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Document.EntityFramework;
 using DocumentService.ApiModels.ApiErrorMessages;
 using DocumentService.ApiModels.ApiInputModels.PhysicalFiles;
 using DocumentService.ApiModels.ApiResponseModels;
 using DocumentService.Commons.Communication;
 using DocumentService.Commons.Constants;
 using DocumentService.Services;
+using EntityFramework.Document;
 using MediatR;
 
 namespace DocumentService.ApiActions.PhysicalFileActions
@@ -43,6 +43,7 @@ namespace DocumentService.ApiActions.PhysicalFileActions
                 S3FileKey = FileConstants.GetFileKey(ext),
                 Active = false,
                 CreatedBy = request.UserId.ToString(),
+                CreatedAt = DateTime.UtcNow
             };
             _dbContext.PhysicalFiles.Add(physicalFile);
             await _dbContext.SaveChangesAsync(cancellationToken);

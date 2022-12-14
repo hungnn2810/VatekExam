@@ -21,6 +21,11 @@ namespace DocumentService.Controllers
         {
         }
 
+        /// <summary>
+        /// Request upload
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         [Authorize("UserOnly")]
         [HttpPost("request-upload")]
         [ProducesResponseType(typeof(ApiResponseModel<PhysicalFileRequestUploadResponseModel>), (int)HttpStatusCode.OK)]
@@ -29,15 +34,17 @@ namespace DocumentService.Controllers
             return await _mediator.Send(ApiActionModel.CreateRequest(UserId, input));
         }
 
+        /// <summary>
+        /// Mark physical files upload done
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         [Authorize("UserOnly")]
-        [HttpPut("upload-done/{physicalFileId}")]
+        [HttpPut("upload-done")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> UploadDone([FromRoute] long physicalFileId)
+        public async Task<IActionResult> UploadDone([FromBody] PhysicalFileMarkUploadDoneInputModel input)
         {
-            return await _mediator.Send(ApiActionModel.CreateRequest(UserId, new PhysicalFileMarkUploadDoneInputModel
-            {
-                PhysicalFileId = physicalFileId
-            }));
+            return await _mediator.Send(ApiActionModel.CreateRequest(UserId, input));
         }
     }
 }

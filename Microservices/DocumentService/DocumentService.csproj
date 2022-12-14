@@ -4,6 +4,10 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>obj\Debug\net5.0\Document.Service.xml</DocumentationFile>
+    <NoWarn>1701;1702;1591</NoWarn>
+  </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Swashbuckle.AspNetCore" />
@@ -33,6 +37,9 @@
     <None Remove="AWSSDK.S3" />
     <None Remove="ApiActions\PhysicalFileActions\" />
     <None Remove="ApiActions\DocumentActions\" />
+    <None Remove="Services\Hubs\" />
+    <None Remove="Swashbuckle.AspNetCore.Filters" />
+    <None Remove="ApiActions\BookmarkActions\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
@@ -42,6 +49,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.31" />
     <PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.101.34" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.6" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Commons\" />
@@ -64,12 +72,14 @@
     <Folder Include="Services\Implements\" />
     <Folder Include="ApiActions\PhysicalFileActions\" />
     <Folder Include="ApiActions\DocumentActions\" />
+    <Folder Include="Services\Hubs\" />
+    <Folder Include="ApiActions\BookmarkActions\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\EntityFramework\Document.EntityFramework\Document.EntityFramework.csproj">
+    <ProjectReference Include="..\..\EntityFramework\EntityFramework.Document\EntityFramework.Document.csproj">
       <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
     </ProjectReference>
-    <ProjectReference Include="..\..\EntityFramework\Identity.EntityFramework\Identity.EntityFramework.csproj">
+    <ProjectReference Include="..\..\EntityFramework\EntityFramework.Identity\EntityFramework.Identity.csproj">
       <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
     </ProjectReference>
   </ItemGroup>
