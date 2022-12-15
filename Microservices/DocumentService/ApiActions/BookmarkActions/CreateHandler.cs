@@ -1,10 +1,11 @@
-﻿using System;
+﻿using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using DocumentService.ApiModels.ApiInputModels.Bookmarks;
 using DocumentService.Commons.Communication;
 using EntityFramework.Document;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace DocumentService.ApiActions.BookmarkActions
 {
@@ -17,12 +18,28 @@ namespace DocumentService.ApiActions.BookmarkActions
             _dbContext = dbContext;
         }
 
-        public Task<IApiResponse> Handle(ApiActionAuthenticateRequest<BookmarkCreateInputModel> request, CancellationToken cancellationToken)
+        public async Task<IApiResponse> Handle(ApiActionAuthenticateRequest<BookmarkCreateInputModel> request, CancellationToken cancellationToken)
         {
+            var existed = await _dbContext.Bookmarks
+                .AnyAsync(x => x.UserId == request.UserId.ToString() &&
+                    x.DocumentId == request.Input.DocumentId &&
+                    x.PageNumber == request.Input.PageNumer,
+                    cancellationToken);
 
+            if (existed)
+            {
+                return ApiResponse.CreateModel(HttpStatusCode.OK);
+            }
 
+            _dbContext.Bookmarks.Add(new Bookmarks
+            {
+                DocumentId = request.Input.DocumentId,
+                UserId = request.UserId.ToString(),
+                PageNumber = request.Input.PageNumer
+            });
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
-            throw new NotImplementedException();
+            return ApiResponse.CreateModel(HttpStatusCode.OK);
         }
     }
 }

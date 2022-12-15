@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,19 +37,33 @@ namespace DocumentService.ApiActions.DocumentActions
                 return ApiResponse.CreateErrorModel(HttpStatusCode.BadRequest, ApiInternalErrorMessages.DocumentNotFound);
             }
 
+            var files = await _dbContext.DocumentPages
+                .Where(x => x.DocumentId == request.Input.DocumentId)
+                .Select(x => x.PhysicalFile)
+                .ToArrayAsync(cancellationToken);
+
             using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
 
             document.Deleted = true;
             document.UpdatedBy = request.UserId.ToString();
             document.UpdatedAt = System.DateTime.UtcNow;
             _dbContext.Documents.Update(document);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            // Set deleted physical file
+            foreach (var file in files)
+            {
+                file.Deleted = true;
+                file.UpdatedAt = DateTime.UtcNow;
+                file.UpdatedBy = request.UserId.ToString();
+                _dbContext.PhysicalFiles.Update(file);
+            }
 
             // Delete mapping
             await _dbContext.DocumentPages
                 .Where(x => x.DocumentId == request.Input.DocumentId)
                 .DeleteFromQueryAsync(cancellationToken);
 
+            await _dbContext.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
 
             await _notificationService.TriggerDeleteDocument(request.Input.DocumentId, cancellationToken);

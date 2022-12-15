@@ -100,13 +100,74 @@ namespace DocumentService.Controllers
         public async Task<IActionResult> SearchMyDocument(
             [Range(1, 100)] int pageSize = 50,
             [Range(1, int.MaxValue)] int pageNumber = 1,
-            [StringLength(128)] string keyword = "")
+            [StringLength(128)] string keyword = "",
+            [FromQuery] long? categoryId = null)
         {
             return await _mediator.Send(ApiActionModel.CreateRequest(UserId, new DocumentSearchForOwnerInputModel
             {
                 PageSize = pageSize,
                 PageNumber = pageNumber,
-                Keyword = keyword
+                Keyword = keyword,
+                CategoryId = categoryId
+            }));
+        }
+
+        /// <summary>
+        /// Get details for owner
+        /// </summary>
+        /// <param name="documentId"></param>
+        /// <returns></returns>
+        [Authorize("UserOnly")]
+        [HttpGet("{documentId}")]
+        [ProducesResponseType(typeof(ApiResponseModel<DocumentDetailsResponseModel>), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetDetails([FromRoute] long documentId)
+        {
+            return await _mediator.Send(ApiActionModel.CreateRequest(UserId, new DocumentGetDetailsInputModel
+            {
+                DocumentId = documentId
+            }));
+        }
+
+        /// <summary>
+        /// Get page content
+        /// </summary>
+        /// <param name="documentId"></param>
+        /// <param name="pageNumber"></param>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpGet("content")]
+        [ProducesResponseType(typeof(ApiResponseModel<DocumentPageRepsonseModel>), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetPageContent([FromQuery] long documentId, [FromQuery] int pageNumber)
+        {
+            return await _mediator.Send(ApiActionModel.CreateRequest(new DocumentGetPageContentInputModel
+            {
+                DocumentId = documentId,
+                PageNumber = pageNumber
+            }));
+        }
+
+        /// <summary>
+        /// Search for anonymous
+        /// </summary>
+        /// <param name="pageSize"></param>
+        /// <param name="pageNumber"></param>
+        /// <param name="keyword"></param>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpGet]
+        [ProducesResponseType(typeof(ApiPagingResponseModel<DocumentResponseModel>), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> Search(
+            [Range(1, 100)] int pageSize = 50,
+            [Range(1, int.MaxValue)] int pageNumber = 1,
+            [StringLength(128)] string keyword = "",
+            [FromQuery] long? categoryId = null)
+        {
+            return await _mediator.Send(ApiActionModel.CreateRequest(new DocumentSearchInputModel
+            {
+                PageSize = pageSize,
+                PageNumber = pageNumber,
+                Keyword = keyword,
+                CategoryId = categoryId
             }));
         }
     }

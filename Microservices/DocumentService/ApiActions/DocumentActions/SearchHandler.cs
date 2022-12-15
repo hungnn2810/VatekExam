@@ -1,36 +1,40 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DocumentService.ApiModels.ApiInputModels.Documents;
 using DocumentService.ApiModels.ApiResponseModels;
 using DocumentService.Commons.Communication;
+using DocumentService.Commons.Enums;
 using EntityFramework.Document;
+using EntityFramework.Identity;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace DocumentService.ApiActions.DocumentActions
 {
-    public class SearchForOwnerHandler : IRequestHandler<ApiActionAuthenticateRequest<DocumentSearchForOwnerInputModel>, IApiResponse>
+    public class SearchHandler : IRequestHandler<ApiActionAnonymousRequest<DocumentSearchInputModel>, IApiResponse>
     {
-        private readonly DocumentDbContext _dbContext;
+        private readonly DocumentDbContext _documentContext;
+        private readonly IdentityDbContext _identityContext;
 
-        public SearchForOwnerHandler(DocumentDbContext dbContext)
+        public SearchHandler(DocumentDbContext documentContext, IdentityDbContext identityContext)
         {
-            _dbContext = dbContext;
+            _documentContext = documentContext;
+            _identityContext = identityContext;
         }
 
-        public async Task<IApiResponse> Handle(ApiActionAuthenticateRequest<DocumentSearchForOwnerInputModel> request, CancellationToken cancellationToken)
+        public async Task<IApiResponse> Handle(ApiActionAnonymousRequest<DocumentSearchInputModel> request, CancellationToken cancellationToken)
         {
-            var query = from d in _dbContext.Documents
-                        where !d.Deleted &&
-                        d.AuthorId == request.UserId.ToString() &&
-                        (request.Input.CategoryId == null || !request.Input.CategoryId.HasValue ||
-                            d.CategoryId == request.Input.CategoryId)
+            var query = from d in _documentContext.Documents
+                        where !d.Deleted && d.Visible.Value &&
+                        (!request.Input.CategoryId.HasValue || d.CategoryId == request.Input.CategoryId.Value)
                         select new
                         {
                             d.DocumentId,
                             d.Title,
                             d.Category.CategoryName,
+                            d.AuthorId,
                             d.Visible,
                             d.CreatedAt,
                             d.UpdatedAt
@@ -44,12 +48,22 @@ namespace DocumentService.ApiActions.DocumentActions
             }
 
             var totalItems = await query.CountAsync(cancellationToken);
-
             var requestPaging = new ApiResponsePaging(request.Input.PageSize, request.Input.PageNumber, totalItems);
 
             var result = await query
                 .Skip(totalItems * (requestPaging.PageNumber - 1))
                 .Take(requestPaging.PageSize)
+                .ToListAsync(cancellationToken);
+
+            var authors = await _identityContext.Users
+                .Where(x => !x.Deleted &&
+                    x.UserStatusId == (short)UserStatusEnum.Normal &&
+                    result.Select(x => x.AuthorId).Contains(x.UserId))
+                .Select(x => new
+                {
+                    x.UserId,
+                    FullName = $"{x.FirstName} {x.LastName}"
+                })
                 .ToListAsync(cancellationToken);
 
             return ApiResponse.CreatePagingModel(
@@ -58,6 +72,7 @@ namespace DocumentService.ApiActions.DocumentActions
                     DocumentId = x.DocumentId,
                     Title = x.Title,
                     CategoryName = x.CategoryName,
+                    Author = authors.Where(u => u.UserId == x.AuthorId).Select(u => u.FullName).FirstOrDefault(),
                     Visible = x.Visible,
                     CreatedAtUtc = x.CreatedAt,
                     UpdatedAtUtc = x.UpdatedAt

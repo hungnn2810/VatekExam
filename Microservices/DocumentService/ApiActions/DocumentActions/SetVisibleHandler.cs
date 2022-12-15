@@ -35,6 +35,8 @@ namespace DocumentService.ApiActions.DocumentActions
             }
 
             document.Visible = request.Input.Details.Visible;
+            document.UpdatedAt = System.DateTime.UtcNow;
+            document.UpdatedBy = request.UserId.ToString();
             _dbContext.Documents.Update(document);
             await _dbContext.SaveChangesAsync(cancellationToken);
 

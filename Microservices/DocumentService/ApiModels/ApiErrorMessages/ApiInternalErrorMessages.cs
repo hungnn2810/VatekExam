@@ -34,6 +34,16 @@ namespace DocumentService.ApiModels.ApiErrorMessages
         {
             Value = "Physical file not found"
         };
+
+        public static ApiErrorMessage BookmarkNotFound => new ApiErrorMessage
+        {
+            Value = "Book mark not found"
+        };
+
+        public static ApiErrorMessage PageContentNotFound => new ApiErrorMessage
+        {
+            Value = "Page content not found"
+        };
         #endregion
 
         #region Invalid errors

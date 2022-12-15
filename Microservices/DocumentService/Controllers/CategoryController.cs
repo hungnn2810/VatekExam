@@ -50,7 +50,7 @@ namespace DocumentService.Controllers
         }
 
         /// <summary>
-        /// Search visible & invisible
+        /// Search visible and invisible
         /// </summary>
         /// <param name="pageSize"></param>
         /// <param name="pageNumber"></param>

@@ -46,7 +46,7 @@ namespace IdentityService.Controllers
         }
 
         /// <summary>
-        /// Login by username & password
+        /// Login by username and password
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>

@@ -38,7 +38,7 @@ namespace DocumentService.ApiActions.CategoryActions
 
             var result = await query
                 .Skip(totalItems * (requestPaging.PageNumber - 1))
-                .Take(requestPaging.PageNumber)
+                .Take(requestPaging.PageSize)
                 .ToListAsync(cancellationToken);
 
             return ApiResponse.CreatePagingModel(

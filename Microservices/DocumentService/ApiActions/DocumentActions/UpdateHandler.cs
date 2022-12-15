@@ -72,6 +72,11 @@ namespace DocumentService.ApiActions.DocumentActions
             }
             #endregion
 
+            var fileIds = await _dbContext.DocumentPages
+                .Where(x => x.DocumentId == request.Input.DocumentId)
+                .Select(x => x.PhysicalFileId)
+                .ToArrayAsync(cancellationToken);
+
             using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
 
             document.CategoryId = request.Input.Details.CategoryId;
@@ -80,10 +85,23 @@ namespace DocumentService.ApiActions.DocumentActions
             document.UpdatedAt = System.DateTime.UtcNow;
             _dbContext.Documents.Update(document);
 
-            // Update mapping
             if (request.Input.Details.UpdatePhysicalFile && request.Input.Details.PhysicalFileIds != null &&
-                request.Input.Details.PhysicalFileIds.Length > 0)
+              request.Input.Details.PhysicalFileIds.Length > 0)
             {
+                // Set deleted physical file
+                var filesToRemove = fileIds.Except(request.Input.Details.PhysicalFileIds).ToArray();
+                foreach (var fileId in filesToRemove)
+                {
+                    _dbContext.PhysicalFiles
+                        .Where(x => x.PhysicalFileId == fileId)
+                        .UpdateFromQuery(x => new PhysicalFiles
+                        {
+                            Deleted = true,
+                            UpdatedAt = DateTime.UtcNow,
+                            UpdatedBy = request.UserId.ToString()
+                        });
+                }
+
                 // Delete old mapping
                 await _dbContext.DocumentPages
                     .Where(x => x.DocumentId == request.Input.DocumentId)
@@ -97,8 +115,10 @@ namespace DocumentService.ApiActions.DocumentActions
                         PhysicalFileId = fileId,
                         PageNumber = index + 1
                     });
-                await _dbContext.DocumentPages.BulkInsertAsync(documentPages);
+                _dbContext.DocumentPages.AddRange(documentPages);
             }
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
 
             await _notificationService.TriggerUpdateDocument(request.Input.DocumentId, cancellationToken);

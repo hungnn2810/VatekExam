@@ -46,6 +46,8 @@ namespace DocumentService.ApiActions.CategoryActions
             category.CategoryName = request.Input.Details.CategoryName;
             category.UpdatedBy = request.UserId.ToString();
             category.UpdatedAt = DateTime.UtcNow;
+            _dbContext.Categories.Update(category);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             return ApiResponse.CreateModel(HttpStatusCode.OK);
         }
