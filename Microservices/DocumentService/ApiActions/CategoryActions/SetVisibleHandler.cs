@@ -23,8 +23,7 @@ namespace DocumentService.ApiActions.CategoryActions
         public async Task<IApiResponse> Handle(ApiActionAuthenticateRequest<CategorySetVisibleInputModel> request, CancellationToken cancellationToken)
         {
             var category = await _dbContext.Categories
-                .Where(x => !x.Deleted &&
-                    x.Visible != request.Input.Details.Visible &&
+                .Where(x => x.Visible != request.Input.Details.Visible &&
                     x.CategoryId == request.Input.CategoryId)
                 .FirstOrDefaultAsync(cancellationToken);
 

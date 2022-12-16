@@ -1,7 +1,7 @@
 ﻿{
     "ReRoutes": [
         {
-            "DownstreamPathTemplate": "/auth/login",
+            "DownstreamPathTemplate": "/auth/{endpoint}",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
                 {
@@ -9,43 +9,7 @@
                     "Port": 4001
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/auth/login",
-            "UpstreamHttpMethod": [ "POST" ]
-        },
-        {
-            "DownstreamPathTemplate": "/auth/register",
-            "DownstreamScheme": "https",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 4001
-                }
-            ],
-            "UpstreamPathTemplate": "/gateway/auth/register",
-            "UpstreamHttpMethod": [ "POST" ]
-        },
-        {
-            "DownstreamPathTemplate": "/auth/verify",
-            "DownstreamScheme": "https",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 4001
-                }
-            ],
-            "UpstreamPathTemplate": "/gateway/auth/verify",
-            "UpstreamHttpMethod": [ "POST" ]
-        },
-        {
-            "DownstreamPathTemplate": "/auth/resend-confirmation",
-            "DownstreamScheme": "https",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 4001
-                }
-            ],
-            "UpstreamPathTemplate": "/gateway/auth/resend-confirmation",
+            "UpstreamPathTemplate": "/gateway/auth/{endpoint}",
             "UpstreamHttpMethod": [ "POST" ]
         },
 
@@ -62,7 +26,7 @@
             "UpstreamHttpMethod": [ "POST", "GET" ]
         },
         {
-            "DownstreamPathTemplate": "/categories/admin",
+            "DownstreamPathTemplate": "/categories/{endpoint}",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
                 {
@@ -70,7 +34,7 @@
                     "Port": 5001
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/categories/admin",
+            "UpstreamPathTemplate": "/gateway/categories/{endpoint}",
             "UpstreamHttpMethod": [ "GET" ]
         },
         {
@@ -99,7 +63,7 @@
         },
 
         {
-            "DownstreamPathTemplate": "/physical-files/request-upload",
+            "DownstreamPathTemplate": "/physical-files",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
                 {
@@ -109,18 +73,6 @@
             ],
             "UpstreamPathTemplate": "/gateway/physical-files",
             "UpstreamHttpMethod": [ "POST" ]
-        },
-        {
-            "DownstreamPathTemplate": "/physical-files/upload-done",
-            "DownstreamScheme": "https",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 5001
-                }
-            ],
-            "UpstreamPathTemplate": "/gateway/physical-files",
-            "UpstreamHttpMethod": [ "PUT" ]
         },
 
         {
@@ -157,7 +109,7 @@
                 }
             ],
             "UpstreamPathTemplate": "/gateway/documents/{documentId}",
-            "UpstreamHttpMethod": [ "DELETE", "PUT", "GET" ]
+            "UpstreamHttpMethod": [ "DELETE", "PUT", "GET", "PATCH" ]
         },
         {
             "DownstreamPathTemplate": "/documents/{documentId}/set-visible",
@@ -172,7 +124,7 @@
             "UpstreamHttpMethod": [ "PUT" ]
         },
         {
-            "DownstreamPathTemplate": "/documents/my-documents",
+            "DownstreamPathTemplate": "/documents/{endpoint}",
             "DownstreamScheme": "https",
             "DownstreamHostAndPorts": [
                 {
@@ -180,19 +132,7 @@
                     "Port": 5001
                 }
             ],
-            "UpstreamPathTemplate": "/gateway/documents/my-documents",
-            "UpstreamHttpMethod": [ "GET" ]
-        },
-        {
-            "DownstreamPathTemplate": "/documents/content",
-            "DownstreamScheme": "https",
-            "DownstreamHostAndPorts": [
-                {
-                    "Host": "localhost",
-                    "Port": 5001
-                }
-            ],
-            "UpstreamPathTemplate": "/gateway/documents/content",
+            "UpstreamPathTemplate": "/gateway/documents/{endpoint}",
             "UpstreamHttpMethod": [ "GET" ]
         },
 

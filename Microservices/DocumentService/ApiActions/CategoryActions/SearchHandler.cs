@@ -22,7 +22,6 @@ namespace DocumentService.ApiActions.CategoryActions
         public async Task<IApiResponse> Handle(ApiActionAuthenticateRequest<CategorySearchInputModel> request, CancellationToken cancellationToken)
         {
             var query = from c in _dbContext.Categories
-                        where !c.Deleted
                         select c;
 
             if (!string.IsNullOrEmpty(request.Input.Keyword) && request.Input.Keyword.Length >= 2)

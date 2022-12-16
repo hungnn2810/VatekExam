@@ -29,8 +29,7 @@ namespace IdentityService.Services
             }
 
             var user = await (from u in _dbContext.Users
-                              where !u.Deleted &&
-                              u.UserName == context.UserName
+                              where u.UserName == context.UserName
                               select u).FirstOrDefaultAsync();
             if (user == null)
             {

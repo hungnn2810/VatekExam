@@ -1,10 +1,13 @@
 ﻿using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon;
 using Amazon.S3;
 using Amazon.S3.Model;
+using Amazon.S3.Transfer;
 using DocumentService.Commons.Constants;
+using Microsoft.AspNetCore.Http;
 
 namespace DocumentService.Services.Implements
 {
@@ -20,28 +23,33 @@ namespace DocumentService.Services.Implements
                 RegionEndpoint.GetBySystemName(AppSettingConstants.S3Settings.Endpoint));
         }
 
-        public string GetPresignedUploadUrl(string bucketName, string fileKey)
+        public async Task<bool> UploadFile(string bucketName, string fileKey, IFormFile file, CancellationToken cancellationToken)
         {
-            var request = _s3Client.GetPreSignedURL(new GetPreSignedUrlRequest
+            using (var memoryStream = new MemoryStream())
             {
-                BucketName = bucketName,
-                Key = fileKey,
-                Verb = HttpVerb.PUT,
-                Expires = DateTime.Now.AddMinutes(60 * 60)
-            });
+                try
+                {
+                    file.CopyTo(memoryStream);
+                    var uploadRequest = new TransferUtilityUploadRequest
+                    {
+                        InputStream = memoryStream,
+                        Key = fileKey,
+                        BucketName = bucketName,
+                    };
 
-            return request;
-        }
+                    var fileTransferUtility = new TransferUtility(_s3Client);
+                    await fileTransferUtility.UploadAsync(uploadRequest, cancellationToken);
 
-        public async Task<GetObjectResponse> GetStat(string bucketName, string fileKey, CancellationToken cancellationToken)
-        {
-            try
-            {
-                return await _s3Client.GetObjectAsync(bucketName, fileKey, cancellationToken);
-            }
-            catch (AmazonS3Exception)
-            {
-                return null;
+                    return true;
+                }
+                catch (AmazonS3Exception)
+                {
+                    return false;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
             }
         }
 

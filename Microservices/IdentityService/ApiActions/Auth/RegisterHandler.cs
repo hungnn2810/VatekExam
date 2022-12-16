@@ -28,7 +28,7 @@ namespace IdentityService.Handlers.CHandlers
         {
             // Check email existed
             var existedEmail = await _dbContext.Users
-                .AnyAsync(x => x.Email == request.Input.Email && !x.Deleted, cancellationToken);
+                .AnyAsync(x => x.Email == request.Input.Email, cancellationToken);
 
             if (existedEmail)
             {
@@ -36,7 +36,7 @@ namespace IdentityService.Handlers.CHandlers
             }
 
             var existedUserName = await _dbContext.Users
-                .AnyAsync(x => x.UserName == request.Input.UserName && !x.Deleted, cancellationToken);
+                .AnyAsync(x => x.UserName == request.Input.UserName, cancellationToken);
 
             if (existedUserName)
             {

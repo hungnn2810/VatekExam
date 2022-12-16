@@ -8,7 +8,8 @@ namespace DocumentService.ApiModels.ApiInputModels.Categories
         [Required]
         public string CategoryName { get; set; }
 
-        public bool? Visible { get; set; }
+        [Required]
+        public bool Visible { get; set; }
     }
 }
 

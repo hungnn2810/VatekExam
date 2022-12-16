@@ -20,9 +20,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using Serilog;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace DocumentService
@@ -49,6 +47,8 @@ namespace DocumentService
                     options.JsonSerializerOptions.IgnoreNullValues = true;
                     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                 });
+
+            services.AddMediatR(typeof(Startup).GetTypeInfo().Assembly);
 
             services.AddSwaggerGen(options =>
             {
@@ -103,8 +103,6 @@ namespace DocumentService
             {
                 options.UseSqlServer(AppSettingConstants.ConnectionStrings.IdentityDb);
             });
-
-            services.AddMediatR(typeof(Startup).GetTypeInfo().Assembly);
 
             services
                 .AddHttpContextAccessor();

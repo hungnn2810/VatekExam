@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 // Code scaffolded by EF Core assumes nullable reference types (NRTs) are not used or disabled.
 // If you have enabled NRTs for your project, then un-comment the following line:
@@ -19,7 +21,6 @@ namespace EntityFramework.Document
 
         public virtual DbSet<Bookmarks> Bookmarks { get; set; }
         public virtual DbSet<Categories> Categories { get; set; }
-        public virtual DbSet<DocumentPages> DocumentPages { get; set; }
         public virtual DbSet<Documents> Documents { get; set; }
         public virtual DbSet<PhysicalFiles> PhysicalFiles { get; set; }
         public virtual DbSet<S3Buckets> S3Buckets { get; set; }
@@ -96,36 +97,9 @@ namespace EntityFramework.Document
                     .IsUnicode(false)
                     .IsFixedLength();
 
-                entity.Property(e => e.Visible)
-                    .IsRequired()
-                    .HasColumnName("visible")
-                    .HasDefaultValueSql("((1))");
-            });
+                entity.Property(e => e.Visible).HasColumnName("visible");
 
-            modelBuilder.Entity<DocumentPages>(entity =>
-            {
-                entity.HasKey(e => new { e.DocumentId, e.PhysicalFileId })
-                    .HasName("PK__document__84713DFD0F925164");
-
-                entity.ToTable("document_pages");
-
-                entity.Property(e => e.DocumentId).HasColumnName("document_id");
-
-                entity.Property(e => e.PhysicalFileId).HasColumnName("physical_file_id");
-
-                entity.Property(e => e.PageNumber).HasColumnName("page_number");
-
-                entity.HasOne(d => d.Document)
-                    .WithMany(p => p.DocumentPages)
-                    .HasForeignKey(d => d.DocumentId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__document___docum__282DF8C2");
-
-                entity.HasOne(d => d.PhysicalFile)
-                    .WithMany(p => p.DocumentPages)
-                    .HasForeignKey(d => d.PhysicalFileId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__document___physi__29221CFB");
+                entity.HasQueryFilter(x => !x.Deleted);
             });
 
             modelBuilder.Entity<Documents>(entity =>
@@ -176,22 +150,21 @@ namespace EntityFramework.Document
                     .IsUnicode(false)
                     .IsFixedLength();
 
-                entity.Property(e => e.Visible)
-                    .IsRequired()
-                    .HasColumnName("visible")
-                    .HasDefaultValueSql("((1))");
+                entity.Property(e => e.Visible).HasColumnName("visible");
 
                 entity.HasOne(d => d.Category)
                     .WithMany(p => p.Documents)
                     .HasForeignKey(d => d.CategoryId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__documents__categ__01142BA1");
+
+                entity.HasQueryFilter(x => !x.Deleted);
             });
 
             modelBuilder.Entity<PhysicalFiles>(entity =>
             {
                 entity.HasKey(e => e.PhysicalFileId)
-                    .HasName("PK__physical__217D5510036708B4");
+                    .HasName("PK__physical__217D55104A35731F");
 
                 entity.ToTable("physical_files");
 
@@ -212,7 +185,11 @@ namespace EntityFramework.Document
 
                 entity.Property(e => e.Deleted).HasColumnName("deleted");
 
+                entity.Property(e => e.DocumentId).HasColumnName("document_id");
+
                 entity.Property(e => e.FileLengthInBytes).HasColumnName("file_length_in_bytes");
+
+                entity.Property(e => e.PageNumber).HasColumnName("page_number");
 
                 entity.Property(e => e.PhysicalFileExtention)
                     .IsRequired()
@@ -245,11 +222,18 @@ namespace EntityFramework.Document
                     .IsUnicode(false)
                     .IsFixedLength();
 
+                entity.HasOne(d => d.Document)
+                    .WithMany(p => p.PhysicalFiles)
+                    .HasForeignKey(d => d.DocumentId)
+                    .HasConstraintName("FK__physical___docum__531856C7");
+
                 entity.HasOne(d => d.S3Bucket)
                     .WithMany(p => p.PhysicalFiles)
                     .HasForeignKey(d => d.S3BucketId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__physical___s3_bu__25518C17");
+                    .HasConstraintName("FK__physical___s3_bu__503BEA1C");
+
+                entity.HasQueryFilter(x => !x.Deleted);
             });
 
             modelBuilder.Entity<S3Buckets>(entity =>

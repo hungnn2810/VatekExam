@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -40,6 +41,7 @@
     <None Remove="Services\Hubs\" />
     <None Remove="Swashbuckle.AspNetCore.Filters" />
     <None Remove="ApiActions\BookmarkActions\" />
+    <None Remove="Filters\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
@@ -74,6 +76,7 @@
     <Folder Include="ApiActions\DocumentActions\" />
     <Folder Include="Services\Hubs\" />
     <Folder Include="ApiActions\BookmarkActions\" />
+    <Folder Include="Filters\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\EntityFramework\EntityFramework.Document\EntityFramework.Document.csproj">

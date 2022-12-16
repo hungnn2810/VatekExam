@@ -34,8 +34,7 @@ namespace DocumentService.ApiActions.CategoryActions
 
             // Check duplicate name
             var duplicateName = await _dbContext.Categories
-                .AnyAsync(x => !x.Deleted &&
-                    x.CategoryName == request.Input.Details.CategoryName &&
+                .AnyAsync(x => x.CategoryName == request.Input.Details.CategoryName &&
                     x.CategoryId != request.Input.CategoryId, cancellationToken);
 
             if (duplicateName)

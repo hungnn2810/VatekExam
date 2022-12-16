@@ -35,7 +35,7 @@ namespace IdentityService.ApiActions.Auth
 
             // Check user existed
             var userExisted = await _dbContext.Users
-                .AnyAsync(x => !x.Deleted && x.UserId == confirmationCode.UserId, cancellationToken);
+                .AnyAsync(x => x.UserId == confirmationCode.UserId, cancellationToken);
 
             if (!userExisted)
             {

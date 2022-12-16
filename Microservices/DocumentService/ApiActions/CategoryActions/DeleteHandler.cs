@@ -23,7 +23,7 @@ namespace DocumentService.ApiActions.CategoryActions
         public async Task<IApiResponse> Handle(ApiActionAuthenticateRequest<CategoryDeleteInputModel> request, CancellationToken cancellationToken)
         {
             var category = await _dbContext.Categories
-               .Where(x => !x.Deleted)
+               .Where(x => x.CategoryId == request.Input.CategoryId)
                .FirstOrDefaultAsync(cancellationToken);
 
             if (category == null)

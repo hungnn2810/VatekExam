@@ -27,8 +27,7 @@ namespace DocumentService.ApiActions.DocumentActions
         public async Task<IApiResponse> Handle(ApiActionAuthenticateRequest<DocumentDeleteInputModel> request, CancellationToken cancellationToken)
         {
             var document = await _dbContext.Documents
-                .Where(x => !x.Deleted &&
-                    x.AuthorId == request.UserId.ToString() &&
+                .Where(x => x.AuthorId == request.UserId.ToString() &&
                     x.DocumentId == request.Input.DocumentId)
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -37,9 +36,8 @@ namespace DocumentService.ApiActions.DocumentActions
                 return ApiResponse.CreateErrorModel(HttpStatusCode.BadRequest, ApiInternalErrorMessages.DocumentNotFound);
             }
 
-            var files = await _dbContext.DocumentPages
+            var files = await _dbContext.PhysicalFiles
                 .Where(x => x.DocumentId == request.Input.DocumentId)
-                .Select(x => x.PhysicalFile)
                 .ToArrayAsync(cancellationToken);
 
             using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
@@ -57,11 +55,6 @@ namespace DocumentService.ApiActions.DocumentActions
                 file.UpdatedBy = request.UserId.ToString();
                 _dbContext.PhysicalFiles.Update(file);
             }
-
-            // Delete mapping
-            await _dbContext.DocumentPages
-                .Where(x => x.DocumentId == request.Input.DocumentId)
-                .DeleteFromQueryAsync(cancellationToken);
 
             await _dbContext.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);

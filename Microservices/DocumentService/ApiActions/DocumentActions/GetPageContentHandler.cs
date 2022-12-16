@@ -25,17 +25,16 @@ namespace DocumentService.ApiActions.DocumentActions
 
         public async Task<IApiResponse> Handle(ApiActionAnonymousRequest<DocumentGetPageContentInputModel> request, CancellationToken cancellationToken)
         {
-            var data = await (from x in _dbContext.DocumentPages
-                              where
-                              !x.Document.Deleted && x.Document.Visible.Value &&
+            var data = await (from x in _dbContext.PhysicalFiles
+                              where x.Active && x.Document.Visible &&
                               x.DocumentId == request.Input.DocumentId &&
                               x.PageNumber == request.Input.PageNumber
                               select new
                               {
                                   x.PhysicalFileId,
                                   x.PageNumber,
-                                  x.PhysicalFile.S3Bucket.S3BucketName,
-                                  x.PhysicalFile.S3FileKey
+                                  x.S3Bucket.S3BucketName,
+                                  x.S3FileKey
                               }).FirstOrDefaultAsync(cancellationToken);
 
             if (data == null)
@@ -47,7 +46,7 @@ namespace DocumentService.ApiActions.DocumentActions
             {
                 PhysicalFileId = data.PhysicalFileId,
                 FileUrl = _s3Service.GetTempPublicUrl(data.S3BucketName, data.S3FileKey),
-                PageNumber = data.PageNumber
+                PageNumber = data.PageNumber.Value
             });
         }
     }

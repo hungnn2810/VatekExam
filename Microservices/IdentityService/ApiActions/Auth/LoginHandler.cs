@@ -53,7 +53,7 @@ namespace IdentityService.Handlers.CHandlers
             }
 
             var user = await _dbContext.Users
-                .Where(u => !u.Deleted && u.UserId == userIdValue.ToString())
+                .Where(u => u.UserId == userIdValue.ToString())
                 .Select(u => new
                 {
                     u.UserId,

@@ -27,8 +27,7 @@ namespace DocumentService.ApiActions.BookmarkActions
         public async Task<IApiResponse> Handle(ApiActionAuthenticateRequest<BookmarkSearchInputModel> request, CancellationToken cancellationToken)
         {
             var query = from bm in _documentContext.Bookmarks
-                        where !bm.Document.Deleted &&
-                        bm.Document.Visible.Value &&
+                        where bm.Document.Visible &&
                         bm.UserId == request.UserId.ToString() &&
                         (request.Input.CategoryId == null || !request.Input.CategoryId.HasValue ||
                            bm.Document.CategoryId == request.Input.CategoryId.Value)
@@ -61,8 +60,7 @@ namespace DocumentService.ApiActions.BookmarkActions
                 .ToListAsync(cancellationToken);
 
             var authors = await _identityContext.Users
-                .Where(x => !x.Deleted &&
-                    x.UserStatusId == (short)UserStatusEnum.Normal &&
+                .Where(x => x.UserStatusId == (short)UserStatusEnum.Normal &&
                     result.Select(x => x.AuthorId).Contains(x.UserId))
                 .Select(x => new
                 {

@@ -624,6 +624,8 @@ namespace EntityFramework.Identity
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.UserTypeId)
                     .HasConstraintName("FK_user_type_id");
+
+                entity.HasQueryFilter(x => !x.Deleted);
             });
 
             OnModelCreatingPartial(modelBuilder);

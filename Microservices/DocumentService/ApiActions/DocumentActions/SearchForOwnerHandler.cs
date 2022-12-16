@@ -22,19 +22,22 @@ namespace DocumentService.ApiActions.DocumentActions
         public async Task<IApiResponse> Handle(ApiActionAuthenticateRequest<DocumentSearchForOwnerInputModel> request, CancellationToken cancellationToken)
         {
             var query = from d in _dbContext.Documents
-                        where !d.Deleted &&
-                        d.AuthorId == request.UserId.ToString() &&
-                        (request.Input.CategoryId == null || !request.Input.CategoryId.HasValue ||
-                            d.CategoryId == request.Input.CategoryId)
+                        where d.AuthorId == request.UserId.ToString()
                         select new
                         {
                             d.DocumentId,
+                            d.CategoryId,
                             d.Title,
                             d.Category.CategoryName,
                             d.Visible,
                             d.CreatedAt,
                             d.UpdatedAt
                         };
+
+            if (request.Input.CategoryId.HasValue)
+            {
+                query = query.Where(x => x.CategoryId == request.Input.CategoryId);
+            }
 
             if (!string.IsNullOrEmpty(request.Input.Keyword) && request.Input.Keyword.Length >= 2)
             {

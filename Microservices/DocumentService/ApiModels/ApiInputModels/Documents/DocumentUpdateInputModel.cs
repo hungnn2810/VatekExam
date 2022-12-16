@@ -20,11 +20,6 @@ namespace DocumentService.ApiModels.ApiInputModels.Documents
 
         [Required]
         public long CategoryId { get; set; }
-
-        [Required]
-        public bool UpdatePhysicalFile { get; set; }
-
-        public long[] PhysicalFileIds { get; set; }
     }
 }
 

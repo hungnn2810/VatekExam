@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 
@@ -77,6 +78,11 @@ namespace DocumentService.Commons.Communication
                     Message = message.Value
                 }
             }, statusCode);
+        }
+
+        internal static IApiResponse CreateErrorModel(HttpStatusCode badRequest, object physicalFileNotFound)
+        {
+            throw new NotImplementedException();
         }
     }
 }

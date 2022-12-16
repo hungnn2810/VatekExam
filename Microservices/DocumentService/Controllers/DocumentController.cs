@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using DocumentService.ApiModels.ApiInputModels.Documents;
 using DocumentService.ApiModels.ApiResponseModels;
 using DocumentService.Commons.Communication;
+using DocumentService.Filters;
 using DocumentService.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -27,9 +28,9 @@ namespace DocumentService.Controllers
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        [Authorize("UserOnly")]
+        [MultiplePoliciesAuthorize("AdminOnly;UserOnly")]
         [HttpPost]
-        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponseModel<DocumentResponseModel>),(int)HttpStatusCode.OK)]
         public async Task<IActionResult> Create([FromBody] DocumentCreateInputModel input)
         {
             return await _mediator.Send(ApiActionModel.CreateRequest(UserId, input));
@@ -40,7 +41,7 @@ namespace DocumentService.Controllers
         /// </summary>
         /// <param name="documentId"></param>
         /// <returns></returns>
-        [Authorize("UserOnly")]
+        [MultiplePoliciesAuthorize("AdminOnly;UserOnly")]
         [HttpDelete("{documentId}")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> Delete([FromRoute] long documentId)
@@ -57,7 +58,7 @@ namespace DocumentService.Controllers
         /// <param name="documentId"></param>
         /// <param name="details"></param>
         /// <returns></returns>
-        [Authorize("UserOnly")]
+        [MultiplePoliciesAuthorize("AdminOnly;UserOnly")]
         [HttpPut("{documentId}/set-visible")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> SetVisible([FromRoute] long documentId, [FromBody] DocumentSetVisibleInput details)
@@ -75,12 +76,30 @@ namespace DocumentService.Controllers
         /// <param name="documentId"></param>
         /// <param name="details"></param>
         /// <returns></returns>
-        [Authorize("UserOnly")]
+        [MultiplePoliciesAuthorize("AdminOnly;UserOnly")]
         [HttpPut("{documentId}")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> Update([FromRoute] long documentId, [FromBody] DocumentUpdateInput details)
         {
             return await _mediator.Send(ApiActionModel.CreateRequest(UserId, new DocumentUpdateInputModel
+            {
+                DocumentId = documentId,
+                Details = details
+            }));
+        }
+
+        /// <summary>
+        /// Update content
+        /// </summary>
+        /// <param name="documentId"></param>
+        /// <param name="details"></param>
+        /// <returns></returns>
+        [MultiplePoliciesAuthorize("AdminOnly;UserOnly")]
+        [HttpPatch("{documentId}")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> UpdateContent([FromRoute] long documentId, [FromBody] DocumentUpdateContentInput details)
+        {
+            return await _mediator.Send(ApiActionModel.CreateRequest(UserId, new DocumentUpdateContentInputModel
             {
                 DocumentId = documentId,
                 Details = details
@@ -94,7 +113,7 @@ namespace DocumentService.Controllers
         /// <param name="pageNumber"></param>
         /// <param name="keyword"></param>
         /// <returns></returns>
-        [Authorize("UserOnly")]
+        [MultiplePoliciesAuthorize("AdminOnly;UserOnly")]
         [HttpGet("my-documents")]
         [ProducesResponseType(typeof(ApiPagingResponseModel<DocumentResponseModel>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> SearchMyDocument(
@@ -117,7 +136,7 @@ namespace DocumentService.Controllers
         /// </summary>
         /// <param name="documentId"></param>
         /// <returns></returns>
-        [Authorize("UserOnly")]
+        [MultiplePoliciesAuthorize("AdminOnly;UserOnly")]
         [HttpGet("{documentId}")]
         [ProducesResponseType(typeof(ApiResponseModel<DocumentDetailsResponseModel>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetDetails([FromRoute] long documentId)

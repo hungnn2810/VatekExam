@@ -27,18 +27,23 @@ namespace DocumentService.ApiActions.DocumentActions
         public async Task<IApiResponse> Handle(ApiActionAnonymousRequest<DocumentSearchInputModel> request, CancellationToken cancellationToken)
         {
             var query = from d in _documentContext.Documents
-                        where !d.Deleted && d.Visible.Value &&
-                        (!request.Input.CategoryId.HasValue || d.CategoryId == request.Input.CategoryId.Value)
-                        select new
-                        {
-                            d.DocumentId,
-                            d.Title,
-                            d.Category.CategoryName,
-                            d.AuthorId,
-                            d.Visible,
-                            d.CreatedAt,
-                            d.UpdatedAt
-                        };
+                         where d.Visible
+                         select new
+                         {
+                             d.DocumentId,
+                             d.CategoryId,
+                             d.Title,
+                             d.Category.CategoryName,
+                             d.AuthorId,
+                             d.Visible,
+                             d.CreatedAt,
+                             d.UpdatedAt
+                         };
+
+            if (request.Input.CategoryId.HasValue)
+            {
+                query = query.Where(x => x.CategoryId == request.Input.CategoryId);
+            }
 
             if (!string.IsNullOrEmpty(request.Input.Keyword) && request.Input.Keyword.Length >= 2)
             {
@@ -56,8 +61,7 @@ namespace DocumentService.ApiActions.DocumentActions
                 .ToListAsync(cancellationToken);
 
             var authors = await _identityContext.Users
-                .Where(x => !x.Deleted &&
-                    x.UserStatusId == (short)UserStatusEnum.Normal &&
+                .Where(x => x.UserStatusId == (short)UserStatusEnum.Normal &&
                     result.Select(x => x.AuthorId).Contains(x.UserId))
                 .Select(x => new
                 {

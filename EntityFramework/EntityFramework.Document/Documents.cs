@@ -12,14 +12,14 @@ namespace EntityFramework.Document
         public Documents()
         {
             Bookmarks = new HashSet<Bookmarks>();
-            DocumentPages = new HashSet<DocumentPages>();
+            PhysicalFiles = new HashSet<PhysicalFiles>();
         }
 
         public long DocumentId { get; set; }
         public long CategoryId { get; set; }
         public string Title { get; set; }
         public string AuthorId { get; set; }
-        public bool? Visible { get; set; }
+        public bool Visible { get; set; }
         public bool Deleted { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -28,6 +28,6 @@ namespace EntityFramework.Document
 
         public virtual Categories Category { get; set; }
         public virtual ICollection<Bookmarks> Bookmarks { get; set; }
-        public virtual ICollection<DocumentPages> DocumentPages { get; set; }
+        public virtual ICollection<PhysicalFiles> PhysicalFiles { get; set; }
     }
 }

@@ -28,8 +28,7 @@ namespace DocumentService.ApiActions.DocumentActions
         {
             #region Validate input
             var document = await _dbContext.Documents
-              .Where(x => !x.Deleted &&
-                  x.AuthorId == request.UserId.ToString() &&
+              .Where(x => x.AuthorId == request.UserId.ToString() &&
                   x.DocumentId == request.Input.DocumentId)
               .FirstOrDefaultAsync(cancellationToken);
 
@@ -39,7 +38,7 @@ namespace DocumentService.ApiActions.DocumentActions
             }
 
             var existCategory = await _dbContext.Categories
-               .AnyAsync(x => !x.Deleted && x.CategoryId == request.Input.Details.CategoryId, cancellationToken);
+               .AnyAsync(x => x.CategoryId == request.Input.Details.CategoryId, cancellationToken);
 
             if (!existCategory)
             {
@@ -47,8 +46,7 @@ namespace DocumentService.ApiActions.DocumentActions
             }
 
             var duplicateName = await _dbContext.Documents
-                .AnyAsync(x => !x.Deleted &&
-                    x.CategoryId == request.Input.Details.CategoryId &&
+                .AnyAsync(x => x.CategoryId == request.Input.Details.CategoryId &&
                     x.DocumentId != request.Input.DocumentId &&
                     x.Title == request.Input.Details.Title, cancellationToken);
 
@@ -56,70 +54,14 @@ namespace DocumentService.ApiActions.DocumentActions
             {
                 return ApiResponse.CreateErrorModel(HttpStatusCode.BadRequest, ApiInternalErrorMessages.DuplicatedDocumentTitle);
             }
-
-            if (request.Input.Details.UpdatePhysicalFile && request.Input.Details.PhysicalFileIds != null &&
-                request.Input.Details.PhysicalFileIds.Length > 0)
-            {
-                var fileIdCount = await _dbContext.PhysicalFiles
-                .CountAsync(x => !x.Deleted && x.Active &&
-                    request.Input.Details.PhysicalFileIds.Contains(x.PhysicalFileId),
-                    cancellationToken);
-
-                if (fileIdCount != request.Input.Details.PhysicalFileIds.Length)
-                {
-                    return ApiResponse.CreateErrorModel(HttpStatusCode.BadRequest, ApiInternalErrorMessages.PhysicalFileNotFound);
-                }
-            }
             #endregion
-
-            var fileIds = await _dbContext.DocumentPages
-                .Where(x => x.DocumentId == request.Input.DocumentId)
-                .Select(x => x.PhysicalFileId)
-                .ToArrayAsync(cancellationToken);
-
-            using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
 
             document.CategoryId = request.Input.Details.CategoryId;
             document.Title = request.Input.Details.Title;
             document.UpdatedBy = request.UserId.ToString();
             document.UpdatedAt = System.DateTime.UtcNow;
             _dbContext.Documents.Update(document);
-
-            if (request.Input.Details.UpdatePhysicalFile && request.Input.Details.PhysicalFileIds != null &&
-              request.Input.Details.PhysicalFileIds.Length > 0)
-            {
-                // Set deleted physical file
-                var filesToRemove = fileIds.Except(request.Input.Details.PhysicalFileIds).ToArray();
-                foreach (var fileId in filesToRemove)
-                {
-                    _dbContext.PhysicalFiles
-                        .Where(x => x.PhysicalFileId == fileId)
-                        .UpdateFromQuery(x => new PhysicalFiles
-                        {
-                            Deleted = true,
-                            UpdatedAt = DateTime.UtcNow,
-                            UpdatedBy = request.UserId.ToString()
-                        });
-                }
-
-                // Delete old mapping
-                await _dbContext.DocumentPages
-                    .Where(x => x.DocumentId == request.Input.DocumentId)
-                    .DeleteFromQueryAsync(cancellationToken);
-
-                // Insert new mapping
-                var documentPages = request.Input.Details.PhysicalFileIds
-                    .Select((fileId, index) => new DocumentPages
-                    {
-                        DocumentId = document.DocumentId,
-                        PhysicalFileId = fileId,
-                        PageNumber = index + 1
-                    });
-                _dbContext.DocumentPages.AddRange(documentPages);
-            }
-
             await _dbContext.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
 
             await _notificationService.TriggerUpdateDocument(request.Input.DocumentId, cancellationToken);
 

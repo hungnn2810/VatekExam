@@ -11,9 +11,6 @@ namespace DocumentService.ApiModels.ApiInputModels.Documents
 
         [Required]
         public long CategoryId { get; set; }
-
-        [Required]
-        public long[] PhysicalFileIds { get; set; }
     }
 }
 

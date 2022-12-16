@@ -23,8 +23,7 @@ namespace DocumentService.ApiActions.DocumentActions
         public async Task<IApiResponse> Handle(ApiActionAuthenticateRequest<DocumentSetVisibleInputModel> request, CancellationToken cancellationToken)
         {
             var document = await _dbContext.Documents
-               .Where(x => !x.Deleted &&
-                   x.Visible != request.Input.Details.Visible &&
+               .Where(x => x.Visible != request.Input.Details.Visible &&
                    x.AuthorId == request.UserId.ToString() &&
                    x.DocumentId == request.Input.DocumentId)
                .FirstOrDefaultAsync(cancellationToken);

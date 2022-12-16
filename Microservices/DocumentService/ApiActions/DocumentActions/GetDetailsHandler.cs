@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,8 +27,7 @@ namespace DocumentService.ApiActions.DocumentActions
         public async Task<IApiResponse> Handle(ApiActionAuthenticateRequest<DocumentGetDetailsInputModel> request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.Documents
-                .Where(x => !x.Deleted &&
-                    x.AuthorId == request.UserId.ToString() &&
+                .Where(x => x.AuthorId == request.UserId.ToString() &&
                     x.DocumentId == request.Input.DocumentId)
                 .Select(x => new DocumentDetailsResponseModel
                 {
@@ -38,12 +36,14 @@ namespace DocumentService.ApiActions.DocumentActions
                     CategoryId = x.CategoryId,
                     Visible = x.Visible,
                     UpdatedAtUtc = x.UpdatedAt,
-                    Pages = x.DocumentPages.Select(mp => new DocumentPageRepsonseModel
-                    {
-                        PhysicalFileId = mp.PhysicalFileId,
-                        FileUrl = _s3Service.GetTempPublicUrl(mp.PhysicalFile.S3Bucket.S3BucketName,mp.PhysicalFile.S3FileKey),
-                        PageNumber = mp.PageNumber
-                    }).ToArray()
+                    Pages = x.PhysicalFiles
+                        .Where(pf => pf.Active)
+                        .Select(pf => new DocumentPageRepsonseModel
+                        {
+                            PhysicalFileId = pf.PhysicalFileId,
+                            FileUrl = _s3Service.GetTempPublicUrl(pf.S3Bucket.S3BucketName, pf.S3FileKey),
+                            PageNumber = pf.PageNumber.Value
+                        }).ToArray()
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 

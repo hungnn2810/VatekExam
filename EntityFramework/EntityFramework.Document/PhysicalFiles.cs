@@ -9,12 +9,9 @@ namespace EntityFramework.Document
 {
     public partial class PhysicalFiles
     {
-        public PhysicalFiles()
-        {
-            DocumentPages = new HashSet<DocumentPages>();
-        }
-
         public long PhysicalFileId { get; set; }
+        public long? DocumentId { get; set; }
+        public int? PageNumber { get; set; }
         public string PhysicalFileName { get; set; }
         public string PhysicalFileExtention { get; set; }
         public long FileLengthInBytes { get; set; }
@@ -27,7 +24,7 @@ namespace EntityFramework.Document
         public string CreatedBy { get; set; }
         public string UpdatedBy { get; set; }
 
+        public virtual Documents Document { get; set; }
         public virtual S3Buckets S3Bucket { get; set; }
-        public virtual ICollection<DocumentPages> DocumentPages { get; set; }
     }
 }

@@ -23,7 +23,7 @@ namespace DocumentService.ApiActions.CategoryActions
         {
             // Check duplicate name
             var duplicateName = await _dbContext.Categories
-                .AnyAsync(x => !x.Deleted && x.CategoryName == request.Input.CategoryName, cancellationToken);
+                .AnyAsync(x => x.CategoryName == request.Input.CategoryName, cancellationToken);
 
             if (duplicateName)
             {
@@ -34,6 +34,7 @@ namespace DocumentService.ApiActions.CategoryActions
             {
                 CategoryName = request.Input.CategoryName,
                 Visible = request.Input.Visible,
+                Deleted = false,
                 CreatedBy = request.UserId.ToString(),
                 CreatedAt = System.DateTime.UtcNow
             });

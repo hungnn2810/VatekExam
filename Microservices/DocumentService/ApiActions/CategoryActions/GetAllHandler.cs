@@ -22,7 +22,7 @@ namespace DocumentService.ApiActions.CategoryActions
         public async Task<IApiResponse> Handle(ApiActionAnonymousRequest<CategoryGetAllInputModel> request, CancellationToken cancellationToken)
         {
             var data = await _dbContext.Categories
-                .Where(x => !x.Deleted && x.Visible.Value)
+                .Where(x => x.Visible)
                 .Select(x => new CategoryResponseModel
                 {
                     CategoryId = x.CategoryId,

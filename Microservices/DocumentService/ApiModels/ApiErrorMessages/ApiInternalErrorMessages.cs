@@ -19,6 +19,16 @@ namespace DocumentService.ApiModels.ApiErrorMessages
             Value = "File corrupted"
         };
 
+        public static ApiErrorMessage FileTooLarge => new ApiErrorMessage
+        {
+            Value = "File too large. Max length is 10MB"
+        };
+
+        public static ApiErrorMessage UploadFailed => new ApiErrorMessage
+        {
+            Value = "Upload failed"
+        };
+
         #region Notfound errors
         public static ApiErrorMessage CategoryNotFound => new ApiErrorMessage
         {
