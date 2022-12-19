@@ -109,7 +109,7 @@ namespace IdentityService
 
             services.AddDbContext<IdentityDbContext>(options =>
             {
-                options.UseSqlServer(AppSettingConstants.ConnectionStrings.IdentityDb);
+                options.UseSqlServer(AppSettingConstants.ConnectionStrings.IdentityDb).EnableSensitiveDataLogging();
             });
 
             services.AddMediatR(typeof(Startup).GetTypeInfo().Assembly);

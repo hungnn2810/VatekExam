@@ -96,12 +96,13 @@ namespace DocumentService
 
             services.AddDbContext<DocumentDbContext>(options =>
             {
-                options.UseSqlServer(AppSettingConstants.ConnectionStrings.DocumentDb);
+                options.UseSqlServer(AppSettingConstants.ConnectionStrings.DocumentDb).EnableSensitiveDataLogging();
             });
 
             services.AddDbContext<IdentityDbContext>(options =>
             {
-                options.UseSqlServer(AppSettingConstants.ConnectionStrings.IdentityDb);
+                options.UseSqlServer(AppSettingConstants.ConnectionStrings.IdentityDb).EnableSensitiveDataLogging();
+                options.EnableSensitiveDataLogging();
             });
 
             services

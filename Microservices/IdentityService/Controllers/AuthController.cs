@@ -68,6 +68,18 @@ namespace IdentityService.Controllers
         {
             return await _mediator.Send(ApiActionModel.CreateRequest(input));
         }
+
+        /// <summary>
+        /// Get access token by refresh toke
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        [HttpPost("refresh-token")]
+        [ProducesResponseType(typeof(ApiResponseModel<UserLoginResponseModel>), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> RefreshToken([FromBody] AuthRefreshTokenInputModel input)
+        {
+            return await _mediator.Send(ApiActionModel.CreateRequest(input));
+        }
     }
 }
 
